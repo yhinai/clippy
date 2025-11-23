@@ -17,12 +17,12 @@ class ClipboardMonitor: ObservableObject {
     private var lastChangeCount: Int = 0
     private var modelContext: ModelContext?
     private var embeddingService: EmbeddingService?
-    private var openAIService: OpenAIService?
+    private var geminiService: GeminiService?
     
-    func startMonitoring(modelContext: ModelContext, embeddingService: EmbeddingService, openAIService: OpenAIService? = nil) {
+    func startMonitoring(modelContext: ModelContext, embeddingService: EmbeddingService, geminiService: GeminiService? = nil) {
         self.modelContext = modelContext
         self.embeddingService = embeddingService
-        self.openAIService = openAIService
+        self.geminiService = geminiService
         
         // Check accessibility permission (for context features), but do not gate clipboard monitoring on it
         checkAccessibilityPermission()
@@ -74,7 +74,7 @@ class ClipboardMonitor: ObservableObject {
                     self.startMonitoring(
                         modelContext: modelContext,
                         embeddingService: embeddingService,
-                        openAIService: self.openAIService
+                        geminiService: self.geminiService
                     )
                 }
             } else {
@@ -270,7 +270,7 @@ class ClipboardMonitor: ObservableObject {
         print("   Size: \(imageData.count) bytes")
         print("   App: \(currentAppName)")
         
-        // Convert image to PNG format (OpenAI only accepts PNG, JPEG, GIF, WebP)
+        // Convert image to PNG format (Gemini only accepts PNG, JPEG, GIF, WebP)
         guard let nsImage = NSImage(data: imageData),
               let pngData = nsImage.pngData() else {
             print("   ❌ Failed to convert image to PNG format")
@@ -291,9 +291,9 @@ class ClipboardMonitor: ObservableObject {
             return
         }
         
-        // 2. Analyze image with OpenAI Vision (async)
+        // 2. Analyze image with Gemini Vision (async)
         Task {
-            let description = await openAIService?.analyzeImage(imageData: pngData) ?? "[Image]"
+            let description = await geminiService?.analyzeImage(imageData: pngData) ?? "[Image]"
             
             print("   📝 Image description: \(description)")
             
@@ -347,7 +347,7 @@ class ClipboardMonitor: ObservableObject {
         let debugPatterns = ["⌨️", "🎯", "✅", "❌", "📤", "📡", "📄", "💾", "🏷️", "🤖", "🛑", "🔄"]
         let containsDebugEmoji = debugPatterns.contains { trimmedContent.contains($0) }
         
-        let logPatterns = ["[HotkeyManager]", "[ContentView]", "[TextCaptureService]", "[OpenAIService]", "[ClipboardMonitor]", "[EmbeddingService]"]
+        let logPatterns = ["[HotkeyManager]", "[ContentView]", "[TextCaptureService]", "[GeminiService]", "[ClipboardMonitor]", "[EmbeddingService]"]
         let containsLogPattern = logPatterns.contains { trimmedContent.contains($0) }
         
         if containsDebugEmoji || containsLogPattern {
@@ -404,9 +404,9 @@ class ClipboardMonitor: ObservableObject {
             }
             
             // Generate tags asynchronously (non-blocking)
-            if let openAIService = openAIService {
+            if let geminiService = geminiService {
                 Task {
-                    let tags = await openAIService.generateTags(
+                    let tags = await geminiService.generateTags(
                         content: content,
                         appName: currentAppName.isEmpty ? nil : currentAppName,
                         context: hasAccessibilityPermission ? accessibilityContext : nil

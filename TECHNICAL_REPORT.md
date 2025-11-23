@@ -9,14 +9,14 @@ Clippy (formerly PastePup) is a macOS clipboard manager leveraging local and clo
 - **ClipboardMonitor**: The central engine that monitors the system pasteboard. It uses `NSPasteboard` polling and Accessibility APIs (`AXUIElement`) to capture content and context (active window, selected text).
 - **Data Layer (SwiftData)**: The `Item` model stores clipboard history, including timestamp, content type (text/image), app source, and vector embeddings.
 - **AI Services**:
-  - `OpenAIService`: Interfaces with OpenAI's API for semantic tagging and question answering (GPT-4/5).
+  - `GeminiService`: Interfaces with Google's Gemini API for semantic tagging and question answering (Gemini 2.5 Flash).
   - `LocalAIService`: Interfaces with a local LLM (e.g., Qwen via local endpoint) for privacy-focused operations.
 - **SuggestionEngine**: Ranks clipboard items based on vector similarity (embeddings), recency, and frequency.
 - **UI Layer (SwiftUI)**: `ContentView` is the main interface. `FloatingDogWindowController` manages the "Clippy-like" floating assistant.
 
 ### Data Flow
 1.  **Capture**: `ClipboardMonitor` detects changes -> Captures content -> Captures Context (AX).
-2.  **Process**: Content is passed to `OpenAIService` or `LocalAIService` for tagging.
+2.  **Process**: Content is passed to `GeminiService` or `LocalAIService` for tagging.
 3.  **Store**: `Item` is saved to `SwiftData`. Embeddings are generated and stored via `EmbeddingService`.
 4.  **Retrieval**: User query -> `SuggestionEngine` searches embeddings -> Returns ranked `Item` list.
 

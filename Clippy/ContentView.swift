@@ -2,13 +2,13 @@ import SwiftUI
 import SwiftData
 
 enum AIServiceType: String, CaseIterable {
-    case openai = "OpenAI"
+    case gemini = "Gemini"
     case local = "Local AI"
     
     var description: String {
         switch self {
-        case .openai:
-            return "OpenAI GPT-5-nano (Cloud)"
+        case .gemini:
+            return "Gemini 2.5 Flash (Cloud)"
         case .local:
             return "Local Qwen3-4b (On-device)"
         }
@@ -24,7 +24,7 @@ struct ContentView: View {
     @StateObject private var textCaptureService = TextCaptureService()
     @StateObject private var floatingDogController = FloatingDogWindowController()
     
-    @State private var openAIService: OpenAIService = OpenAIService(apiKey: "")
+    @State private var geminiService: GeminiService = GeminiService(apiKey: "")
     @State private var localAIService: LocalAIService = LocalAIService()
     
     // Navigation State
@@ -32,7 +32,7 @@ struct ContentView: View {
     @State private var selectedItem: Item?
     @State private var searchText: String = ""
     @State private var showSettings: Bool = false
-    @State private var selectedAIService: AIServiceType = .openai
+    @State private var selectedAIService: AIServiceType = .gemini
     
     // AI Processing State
     @State private var isProcessingAnswer: Bool = false
@@ -111,7 +111,7 @@ struct ContentView: View {
         // Load stored API key
         let storedKey = getStoredAPIKey()
         if !storedKey.isEmpty {
-            openAIService = OpenAIService(apiKey: storedKey)
+            geminiService = GeminiService(apiKey: storedKey)
         }
         
         Task {
@@ -119,7 +119,7 @@ struct ContentView: View {
             clipboardMonitor.startMonitoring(
                 modelContext: modelContext,
                 embeddingService: embeddingService,
-                openAIService: openAIService
+                geminiService: geminiService
             )
             
             startHotkeys()
@@ -210,8 +210,8 @@ struct ContentView: View {
             let imageIndex: Int?
             
             switch selectedAIService {
-            case .openai:
-                (answer, imageIndex) = await openAIService.generateAnswerWithImageDetection(
+            case .gemini:
+                (answer, imageIndex) = await geminiService.generateAnswerWithImageDetection(
                     question: capturedText,
                     clipboardContext: clipboardContext,
                     appName: clipboardMonitor.currentAppName
@@ -285,22 +285,22 @@ struct ContentView: View {
     // MARK: - API Key Helpers
     
     private func saveAPIKey(_ key: String) {
-        UserDefaults.standard.set(key, forKey: "OpenAI_API_Key")
-        openAIService = OpenAIService(apiKey: key)
+        UserDefaults.standard.set(key, forKey: "Gemini_API_Key")
+        geminiService = GeminiService(apiKey: key)
         // Restart monitoring
         clipboardMonitor.stopMonitoring()
         clipboardMonitor.startMonitoring(
             modelContext: modelContext,
             embeddingService: embeddingService,
-            openAIService: openAIService
+            geminiService: geminiService
         )
     }
     
     private func getStoredAPIKey() -> String {
         // Prioritize environment/file keys for dev, fallback to UserDefaults
-        if let envKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"], !envKey.isEmpty { return envKey }
+        if let envKey = ProcessInfo.processInfo.environment["GEMINI_API_KEY"], !envKey.isEmpty { return envKey }
         // Check .env file logic omitted for brevity but can be re-added if critical
-        return UserDefaults.standard.string(forKey: "OpenAI_API_Key") ?? ""
+        return UserDefaults.standard.string(forKey: "Gemini_API_Key") ?? "AIzaSyAyt9Fpkr6RhxAgtdU1_N1MdgJgtpqqiR8"
     }
 }
 
@@ -322,14 +322,14 @@ struct SettingsView: View {
             Divider()
             
             VStack(alignment: .leading, spacing: 12) {
-                Text("OpenAI API Key")
+                Text("Gemini API Key")
                     .font(.headline)
                 
                 SecureField("sk-...", text: $tempKey)
                     .textFieldStyle(.roundedBorder)
                     .onAppear { tempKey = apiKey }
                 
-                Text("Required for OpenAI services. Keys are stored locally.")
+                Text("Required for Gemini services. Keys are stored locally.")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }

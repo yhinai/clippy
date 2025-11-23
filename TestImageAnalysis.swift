@@ -3,16 +3,19 @@
 import Foundation
 
 // MARK: - Response Models
-struct OpenAIResponse: Codable {
-    let choices: [Choice]
-    
-    struct Choice: Codable {
-        let message: Message
+struct GeminiAPIResponse: Codable {
+    struct Candidate: Codable {
+        struct Content: Codable {
+            struct Part: Codable {
+                let text: String?
+            }
+            let parts: [Part]?
+            let role: String?
+        }
+        let content: Content?
+        let finishReason: String?
     }
-    
-    struct Message: Codable {
-        let content: String
-    }
+    let candidates: [Candidate]?
 }
 
 // MARK: - Image Analysis Function
@@ -31,36 +34,34 @@ func analyzeImage(imagePath: String, apiKey: String) async throws -> String {
     print("✓ Image loaded: \(expandedPath)")
     print("✓ Image size: \(imageData.count) bytes")
     print("✓ Base64 length: \(base64Image.count) characters")
-    print("\nSending request to OpenAI...\n")
+    print("\nSending request to Gemini...\n")
     
     // Prepare the request
-    let url = URL(string: "https://api.openai.com/v1/chat/completions")!
+    let modelName = "gemini-2.5-flash"
+    let url = URL(string: "https://generativelanguage.googleapis.com/v1beta/models/\(modelName):generateContent?key=\(apiKey)")!
+    
     var request = URLRequest(url: url)
     request.httpMethod = "POST"
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-    request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
     
     // Build the request body
     let requestBody: [String: Any] = [
-        "model": "gpt-4.1",
-        "messages": [
+        "contents": [
             [
-                "role": "user",
-                "content": [
+                "parts": [
+                    ["text": "give quick summary of it."],
                     [
-                        "type": "text",
-                        "text": "give quick summary of it."
-                    ],
-                    [
-                        "type": "image_url",
-                        "image_url": [
-                            "url": "data:image/png;base64,\(base64Image)"
+                        "inline_data": [
+                            "mime_type": "image/png",
+                            "data": base64Image
                         ]
                     ]
                 ]
             ]
         ],
-        "max_tokens": 500
+        "generationConfig": [
+            "maxOutputTokens": 500
+        ]
     ]
     
     request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
@@ -80,13 +81,13 @@ func analyzeImage(imagePath: String, apiKey: String) async throws -> String {
     
     // Parse response
     let decoder = JSONDecoder()
-    let openAIResponse = try decoder.decode(OpenAIResponse.self, from: data)
+    let geminiResponse = try decoder.decode(GeminiAPIResponse.self, from: data)
     
-    guard let firstChoice = openAIResponse.choices.first else {
+    guard let text = geminiResponse.candidates?.first?.content?.parts?.first?.text else {
         throw NSError(domain: "ImageAnalysis", code: 3, userInfo: [NSLocalizedDescriptionKey: "No response content"])
     }
     
-    return firstChoice.message.content
+    return text
 }
 
 // Helper to repeat strings
@@ -97,18 +98,18 @@ extension String {
 }
 
 // MARK: - Main Execution
-print("=== OpenAI Vision API - Image Analysis Test ===\n")
+print("=== Gemini Vision API - Image Analysis Test ===\n")
 
 // Get API key from environment
-guard let apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"], !apiKey.isEmpty else {
-    print("❌ Error: OPENAI_API_KEY environment variable not set")
+guard let apiKey = ProcessInfo.processInfo.environment["GEMINI_API_KEY"], !apiKey.isEmpty else {
+    print("❌ Error: GEMINI_API_KEY environment variable not set")
     print("\nPlease set it using:")
-    print("export OPENAI_API_KEY='your-api-key-here'")
+    print("export GEMINI_API_KEY='your-api-key-here'")
     exit(1)
 }
 
 // Image path
-let imagePath = "~/Desktop/test.png"
+let imagePath = "map.png" // User provided path
 
 // Run async task
 Task {
@@ -130,4 +131,3 @@ Task {
 
 // Keep the script running until the async task completes
 RunLoop.main.run()
-
