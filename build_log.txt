@@ -1,0 +1,331 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild build -scheme Clippy -project Clippy.xcodeproj -destination platform=macOS CODE_SIGN_IDENTITY= CODE_SIGNING_REQUIRED=NO
+
+Build settings from command line:
+    CODE_SIGN_IDENTITY = 
+    CODE_SIGNING_REQUIRED = NO
+
+Resolve Package Graph
+
+
+Resolved source packages:
+  mlx-swift: https://github.com/ml-explore/mlx-swift @ 0.25.6
+  Jinja: https://github.com/huggingface/swift-jinja.git @ 2.1.0
+  swift-collections: https://github.com/apple/swift-collections.git @ 1.3.0
+  swift-transformers: https://github.com/huggingface/swift-transformers @ 1.0.0
+  mlx-libraries: https://github.com/ml-explore/mlx-swift-examples/ @ main (6e987d8)
+  swift-sentencepiece: https://github.com/jkrukowski/swift-sentencepiece @ 0.0.6
+  swift-argument-parser: https://github.com/apple/swift-argument-parser.git @ 1.6.1
+  swift-numerics: https://github.com/apple/swift-numerics @ 1.1.1
+  swift-embeddings: https://github.com/jkrukowski/swift-embeddings.git @ 0.0.21
+  VecturaKit: https://github.com/rryam/VecturaKit.git @ main (bce720f)
+  Gzip: https://github.com/1024jp/GzipSwift @ 6.0.1
+  swift-safetensors: https://github.com/jkrukowski/swift-safetensors.git @ 0.0.8
+
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:macOS, arch:arm64, id:00006040-001C41C20E20801C, name:My Mac }
+{ platform:macOS, arch:x86_64, id:00006040-001C41C20E20801C, name:My Mac }
+note: Using codesigning identity override: 
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (45 targets)
+    Target 'Clippy' in project 'Clippy'
+        ➜ Explicit dependency on target 'VecturaMLXKit' in project 'VecturaKit'
+        ➜ Explicit dependency on target 'VecturaKit' in project 'VecturaKit'
+    Target 'VecturaKit' in project 'VecturaKit'
+        ➜ Explicit dependency on target 'VecturaKit' in project 'VecturaKit'
+        ➜ Explicit dependency on target 'Embeddings' in project 'swift-embeddings'
+    Target 'VecturaMLXKit' in project 'VecturaKit'
+        ➜ Explicit dependency on target 'VecturaMLXKit' in project 'VecturaKit'
+        ➜ Explicit dependency on target 'VecturaKit' in project 'VecturaKit'
+        ➜ Explicit dependency on target 'Embeddings' in project 'swift-embeddings'
+        ➜ Explicit dependency on target 'MLXEmbedders' in project 'mlx-libraries'
+    Target 'VecturaMLXKit' in project 'VecturaKit'
+        ➜ Explicit dependency on target 'VecturaKit' in project 'VecturaKit'
+        ➜ Explicit dependency on target 'Embeddings' in project 'swift-embeddings'
+        ➜ Explicit dependency on target 'MLXEmbedders' in project 'mlx-libraries'
+    Target 'MLXEmbedders' in project 'mlx-libraries'
+        ➜ Explicit dependency on target 'MLXEmbedders' in project 'mlx-libraries'
+        ➜ Explicit dependency on target 'MLXLMCommon' in project 'mlx-libraries'
+        ➜ Explicit dependency on target 'MLX' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLXNN' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLXOptimizers' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLXRandom' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLXLinalg' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'Transformers' in project 'swift-transformers'
+        ➜ Explicit dependency on target 'MLXFast' in project 'mlx-swift'
+    Target 'MLXEmbedders' in project 'mlx-libraries'
+        ➜ Explicit dependency on target 'MLXLMCommon' in project 'mlx-libraries'
+        ➜ Explicit dependency on target 'MLX' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLXNN' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLXOptimizers' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLXRandom' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLXLinalg' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'Transformers' in project 'swift-transformers'
+        ➜ Explicit dependency on target 'MLXFast' in project 'mlx-swift'
+    Target 'MLXFast' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLXFast' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'Cmlx' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLX' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'Numerics' in project 'swift-numerics'
+    Target 'MLXLMCommon' in project 'mlx-libraries'
+        ➜ Explicit dependency on target 'MLX' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLXNN' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLXOptimizers' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLXRandom' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLXLinalg' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'Transformers' in project 'swift-transformers'
+    Target 'MLXLinalg' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLXLinalg' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'Cmlx' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLX' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'Numerics' in project 'swift-numerics'
+    Target 'MLXLinalg' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'Cmlx' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLX' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'Numerics' in project 'swift-numerics'
+    Target 'MLXRandom' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLXRandom' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'Cmlx' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLX' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'Numerics' in project 'swift-numerics'
+    Target 'MLXOptimizers' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLXOptimizers' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'Cmlx' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLX' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLXRandom' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLXFast' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLXNN' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'Numerics' in project 'swift-numerics'
+    Target 'MLXOptimizers' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'Cmlx' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLX' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLXRandom' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLXFast' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLXNN' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'Numerics' in project 'swift-numerics'
+    Target 'MLXNN' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLXNN' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'Cmlx' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLX' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLXRandom' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLXFast' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'Numerics' in project 'swift-numerics'
+    Target 'MLXNN' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'Cmlx' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLX' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLXRandom' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLXFast' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'Numerics' in project 'swift-numerics'
+    Target 'MLXFast' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'Cmlx' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLX' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'Numerics' in project 'swift-numerics'
+    Target 'MLXRandom' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'Cmlx' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLX' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'Numerics' in project 'swift-numerics'
+    Target 'MLX' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'MLX' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'Cmlx' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'Numerics' in project 'swift-numerics'
+    Target 'MLX' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'Cmlx' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'Numerics' in project 'swift-numerics'
+    Target 'Numerics' in project 'swift-numerics'
+        ➜ Explicit dependency on target 'Numerics' in project 'swift-numerics'
+        ➜ Explicit dependency on target '_NumericsShims' in project 'swift-numerics'
+        ➜ Explicit dependency on target 'RealModule' in project 'swift-numerics'
+        ➜ Explicit dependency on target 'ComplexModule' in project 'swift-numerics'
+    Target 'Numerics' in project 'swift-numerics'
+        ➜ Explicit dependency on target '_NumericsShims' in project 'swift-numerics'
+        ➜ Explicit dependency on target 'RealModule' in project 'swift-numerics'
+        ➜ Explicit dependency on target 'ComplexModule' in project 'swift-numerics'
+    Target 'ComplexModule' in project 'swift-numerics'
+        ➜ Explicit dependency on target '_NumericsShims' in project 'swift-numerics'
+        ➜ Explicit dependency on target 'RealModule' in project 'swift-numerics'
+    Target 'RealModule' in project 'swift-numerics'
+        ➜ Explicit dependency on target '_NumericsShims' in project 'swift-numerics'
+    Target '_NumericsShims' in project 'swift-numerics' (no dependencies)
+    Target 'Cmlx' in project 'mlx-swift'
+        ➜ Explicit dependency on target 'mlx-swift_Cmlx' in project 'mlx-swift'
+    Target 'mlx-swift_Cmlx' in project 'mlx-swift' (no dependencies)
+    Target 'VecturaKit' in project 'VecturaKit'
+        ➜ Explicit dependency on target 'Embeddings' in project 'swift-embeddings'
+    Target 'Embeddings' in project 'swift-embeddings'
+        ➜ Explicit dependency on target 'Embeddings' in project 'swift-embeddings'
+        ➜ Explicit dependency on target 'MLTensorUtils' in project 'swift-embeddings'
+        ➜ Explicit dependency on target 'Safetensors' in project 'swift-safetensors'
+        ➜ Explicit dependency on target 'Transformers' in project 'swift-transformers'
+        ➜ Explicit dependency on target 'SentencepieceTokenizer' in project 'swift-sentencepiece'
+    Target 'Embeddings' in project 'swift-embeddings'
+        ➜ Explicit dependency on target 'MLTensorUtils' in project 'swift-embeddings'
+        ➜ Explicit dependency on target 'Safetensors' in project 'swift-safetensors'
+        ➜ Explicit dependency on target 'Transformers' in project 'swift-transformers'
+        ➜ Explicit dependency on target 'SentencepieceTokenizer' in project 'swift-sentencepiece'
+    Target 'SentencepieceTokenizer' in project 'swift-sentencepiece'
+        ➜ Explicit dependency on target 'SentencepieceTokenizer' in project 'swift-sentencepiece'
+    Target 'SentencepieceTokenizer' in project 'swift-sentencepiece' (no dependencies)
+    Target 'Transformers' in project 'swift-transformers'
+        ➜ Explicit dependency on target 'Tokenizers' in project 'swift-transformers'
+        ➜ Explicit dependency on target 'Generation' in project 'swift-transformers'
+        ➜ Explicit dependency on target 'Models' in project 'swift-transformers'
+        ➜ Explicit dependency on target 'Hub' in project 'swift-transformers'
+        ➜ Explicit dependency on target 'Jinja' in project 'Jinja'
+    Target 'Models' in project 'swift-transformers'
+        ➜ Explicit dependency on target 'Hub' in project 'swift-transformers'
+        ➜ Explicit dependency on target 'Tokenizers' in project 'swift-transformers'
+        ➜ Explicit dependency on target 'Generation' in project 'swift-transformers'
+        ➜ Explicit dependency on target 'Jinja' in project 'Jinja'
+    Target 'Generation' in project 'swift-transformers'
+        ➜ Explicit dependency on target 'Hub' in project 'swift-transformers'
+        ➜ Explicit dependency on target 'Tokenizers' in project 'swift-transformers'
+        ➜ Explicit dependency on target 'Jinja' in project 'Jinja'
+    Target 'Tokenizers' in project 'swift-transformers'
+        ➜ Explicit dependency on target 'Hub' in project 'swift-transformers'
+        ➜ Explicit dependency on target 'Jinja' in project 'Jinja'
+    Target 'Hub' in project 'swift-transformers'
+        ➜ Explicit dependency on target 'swift-transformers_Hub' in project 'swift-transformers'
+        ➜ Explicit dependency on target 'Jinja' in project 'Jinja'
+    Target 'Jinja' in project 'Jinja'
+        ➜ Explicit dependency on target 'Jinja' in project 'Jinja'
+        ➜ Explicit dependency on target 'OrderedCollections' in project 'swift-collections'
+    Target 'Jinja' in project 'Jinja'
+        ➜ Explicit dependency on target 'OrderedCollections' in project 'swift-collections'
+    Target 'OrderedCollections' in project 'swift-collections'
+        ➜ Explicit dependency on target 'OrderedCollections' in project 'swift-collections'
+        ➜ Explicit dependency on target 'InternalCollectionsUtilities' in project 'swift-collections'
+    Target 'OrderedCollections' in project 'swift-collections'
+        ➜ Explicit dependency on target 'InternalCollectionsUtilities' in project 'swift-collections'
+    Target 'InternalCollectionsUtilities' in project 'swift-collections' (no dependencies)
+    Target 'swift-transformers_Hub' in project 'swift-transformers' (no dependencies)
+    Target 'Safetensors' in project 'swift-safetensors'
+        ➜ Explicit dependency on target 'Safetensors' in project 'swift-safetensors'
+    Target 'Safetensors' in project 'swift-safetensors' (no dependencies)
+    Target 'MLTensorUtils' in project 'swift-embeddings' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc --version
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.1.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.1.sdk -x objective-c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.1.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/usr/bin/actool --version --output-format xml1
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.1.sdk -x c++ -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+
+ReadFileContents /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/docc/features.json
+
+Build description signature: 7ce535705e95f5c7c0ac9664c28cfbb1
+Build description path: /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Intermediates.noindex/XCBuildData/7ce535705e95f5c7c0ac9664c28cfbb1.xcbuilddata
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.1.sdk /Users/alhinai/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/macosx26.1-25B74-3885c01c3e6b6a337905948deab2002e3ae1261907bdadc328169391a47051a6.sdkstatcache
+    cd /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/Clippy.xcodeproj
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.1.sdk -o /Users/alhinai/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/macosx26.1-25B74-3885c01c3e6b6a337905948deab2002e3ae1261907bdadc328169391a47051a6.sdkstatcache
+
+ProcessInfoPlistFile /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/swift-transformers_Hub.bundle/Contents/Info.plist /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Intermediates.noindex/swift-transformers.build/Debug/swift-transformers_Hub.build/empty-swift-transformers_Hub.plist (in target 'swift-transformers_Hub' from project 'swift-transformers')
+    cd /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/SourcePackages/checkouts/swift-transformers
+    builtin-infoPlistUtility /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Intermediates.noindex/swift-transformers.build/Debug/swift-transformers_Hub.build/empty-swift-transformers_Hub.plist -producttype com.apple.product-type.bundle -expandbuildsettings -platform macosx -o /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/swift-transformers_Hub.bundle/Contents/Info.plist
+
+ProcessInfoPlistFile /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/mlx-swift_Cmlx.bundle/Contents/Info.plist /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Intermediates.noindex/mlx-swift.build/Debug/mlx-swift_Cmlx.build/empty-mlx-swift_Cmlx.plist (in target 'mlx-swift_Cmlx' from project 'mlx-swift')
+    cd /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/SourcePackages/checkouts/mlx-swift
+    builtin-infoPlistUtility /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Intermediates.noindex/mlx-swift.build/Debug/mlx-swift_Cmlx.build/empty-mlx-swift_Cmlx.plist -producttype com.apple.product-type.bundle -expandbuildsettings -platform macosx -o /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/mlx-swift_Cmlx.bundle/Contents/Info.plist
+
+warning: Clippy isn't code signed but requires entitlements. It is not possible to add entitlements to a binary without signing it. (in target 'Clippy' from project 'Clippy')
+CpResource /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources/Husky.aseprite /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle\ 2/ASE/Husky.aseprite (in target 'Clippy' from project 'Clippy')
+    cd /Users/alhinai/.cursor/worktrees/IakHf/mSf7q
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle\ 2/ASE/Husky.aseprite /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources
+error: lstat(/Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle 2/ASE/Husky.aseprite): No such file or directory (2) (in target 'Clippy' from project 'Clippy')
+
+CpResource /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources/Labrador.aseprite /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle\ 2/ASE/Labrador.aseprite (in target 'Clippy' from project 'Clippy')
+    cd /Users/alhinai/.cursor/worktrees/IakHf/mSf7q
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle\ 2/ASE/Labrador.aseprite /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources
+error: lstat(/Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle 2/ASE/Labrador.aseprite): No such file or directory (2) (in target 'Clippy' from project 'Clippy')
+
+CpResource /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources/README.txt /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle\ 2/README.txt (in target 'Clippy' from project 'Clippy')
+    cd /Users/alhinai/.cursor/worktrees/IakHf/mSf7q
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle\ 2/README.txt /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources
+error: lstat(/Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle 2/README.txt): No such file or directory (2) (in target 'Clippy' from project 'Clippy')
+
+CpResource /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources/Delmatian.aseprite /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle\ 2/ASE/Delmatian.aseprite (in target 'Clippy' from project 'Clippy')
+    cd /Users/alhinai/.cursor/worktrees/IakHf/mSf7q
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle\ 2/ASE/Delmatian.aseprite /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources
+error: lstat(/Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle 2/ASE/Delmatian.aseprite): No such file or directory (2) (in target 'Clippy' from project 'Clippy')
+
+CpResource /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources/CuteDog.mov /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/CuteDog.mov (in target 'Clippy' from project 'Clippy')
+    cd /Users/alhinai/.cursor/worktrees/IakHf/mSf7q
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/CuteDog.mov /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources
+
+CpResource /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources/CuteDog.gif /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/CuteDog.gif (in target 'Clippy' from project 'Clippy')
+    cd /Users/alhinai/.cursor/worktrees/IakHf/mSf7q
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/CuteDog.gif /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources
+
+CpResource /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources/Corgi.aseprite /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle\ 2/ASE/Corgi.aseprite (in target 'Clippy' from project 'Clippy')
+    cd /Users/alhinai/.cursor/worktrees/IakHf/mSf7q
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle\ 2/ASE/Corgi.aseprite /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources
+error: lstat(/Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle 2/ASE/Corgi.aseprite): No such file or directory (2) (in target 'Clippy' from project 'Clippy')
+
+CpResource /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources/Collie.aseprite /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle\ 2/ASE/Collie.aseprite (in target 'Clippy' from project 'Clippy')
+    cd /Users/alhinai/.cursor/worktrees/IakHf/mSf7q
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle\ 2/ASE/Collie.aseprite /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources
+error: lstat(/Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle 2/ASE/Collie.aseprite): No such file or directory (2) (in target 'Clippy' from project 'Clippy')
+
+CopyPlistFile /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources/Info.plist /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/Clippy/Info.plist (in target 'Clippy' from project 'Clippy')
+    cd /Users/alhinai/.cursor/worktrees/IakHf/mSf7q
+    builtin-copyPlist --outdir /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources -- /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/Clippy/Info.plist
+
+SwiftDriver Clippy normal arm64 com.apple.xcode.tools.swift.compiler (in target 'Clippy' from project 'Clippy')
+    cd /Users/alhinai/.cursor/worktrees/IakHf/mSf7q
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name Clippy -Onone -enforce-exclusivity\=checked @/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Intermediates.noindex/Clippy.build/Debug/Clippy.build/Objects-normal/arm64/Clippy.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.1.sdk -target arm64-apple-macos15.0 -g -module-cache-path /Users/alhinai/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug -F /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug -emit-localized-strings -emit-localized-strings-path /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Intermediates.noindex/Clippy.build/Debug/Clippy.build/Objects-normal/arm64 -c -j14 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/alhinai/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/macosx26.1-25B74-3885c01c3e6b6a337905948deab2002e3ae1261907bdadc328169391a47051a6.sdkstatcache -output-file-map /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Intermediates.noindex/Clippy.build/Debug/Clippy.build/Objects-normal/arm64/Clippy-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/alhinai/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/alhinai/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Intermediates.noindex/Clippy.build/Debug/Clippy.build/Objects-normal/arm64/Clippy.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/alhinai/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Intermediates.noindex/Clippy.build/Debug/Clippy.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Intermediates.noindex/Clippy.build/Debug/Clippy.build/Objects-normal/arm64/Clippy_const_extract_protocols.json -Xcc -iquote -Xcc /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Intermediates.noindex/Clippy.build/Debug/Clippy.build/Clippy-generated-files.hmap -Xcc -I/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Intermediates.noindex/Clippy.build/Debug/Clippy.build/Clippy-own-target-headers.hmap -Xcc -I/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Intermediates.noindex/Clippy.build/Debug/Clippy.build/Clippy-all-non-framework-target-headers.hmap -Xcc -ivfsoverlay -Xcc /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Intermediates.noindex/Clippy.build/Debug/Clippy-8822d39a5940d089ead604b0a5b4fbf4-VFS/all-product-headers.yaml -Xcc -iquote -Xcc /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Intermediates.noindex/Clippy.build/Debug/Clippy.build/Clippy-project-headers.hmap -Xcc -I/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/SourcePackages/checkouts/swift-numerics/Sources/_NumericsShims/include -Xcc -I/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/SourcePackages/checkouts/mlx-swift/Source/Cmlx/include -Xcc -I/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/include -Xcc -I/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Intermediates.noindex/Clippy.build/Debug/Clippy.build/DerivedSources-normal/arm64 -Xcc -I/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Intermediates.noindex/Clippy.build/Debug/Clippy.build/DerivedSources/arm64 -Xcc -I/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Intermediates.noindex/Clippy.build/Debug/Clippy.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Intermediates.noindex/Clippy.build/Debug/Clippy.build/Objects-normal/arm64/Clippy-Swift.h -working-directory /Users/alhinai/.cursor/worktrees/IakHf/mSf7q -experimental-emit-module-separately -disable-cmo
+
+CopyPNGFile /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources/Labrador.png /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle\ 2/PNGs/Labrador.png (in target 'Clippy' from project 'Clippy')
+    cd /Users/alhinai/.cursor/worktrees/IakHf/mSf7q
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle\ 2/PNGs/Labrador.png /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources/Labrador.png
+error: Build input file cannot be found: '/Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle 2/PNGs/Labrador.png'. Did you forget to declare this file as an output of a script phase or custom build rule which produces it? (in target 'Clippy' from project 'Clippy')
+
+CopyPNGFile /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources/Husky.png /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle\ 2/PNGs/Husky.png (in target 'Clippy' from project 'Clippy')
+    cd /Users/alhinai/.cursor/worktrees/IakHf/mSf7q
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle\ 2/PNGs/Husky.png /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources/Husky.png
+error: Build input file cannot be found: '/Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle 2/PNGs/Husky.png'. Did you forget to declare this file as an output of a script phase or custom build rule which produces it? (in target 'Clippy' from project 'Clippy')
+
+Ld /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/MacOS/__preview.dylib normal (in target 'Clippy' from project 'Clippy')
+    cd /Users/alhinai/.cursor/worktrees/IakHf/mSf7q
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-macos15.0 -dynamiclib -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.1.sdk -O0 -L/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug -F/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/PackageFrameworks -F/Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug -install_name @rpath/Clippy.debug.dylib -dead_strip -rdynamic -Xlinker -no_deduplicate -Xlinker -dependency_info -Xlinker /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Intermediates.noindex/Clippy.build/Debug/Clippy.build/Objects-normal/arm64/Clippy_dependency_info.dat -o /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/MacOS/__preview.dylib
+
+CopyPNGFile /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources/Delmatian.png /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle\ 2/PNGs/Delmatian.png (in target 'Clippy' from project 'Clippy')
+    cd /Users/alhinai/.cursor/worktrees/IakHf/mSf7q
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle\ 2/PNGs/Delmatian.png /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources/Delmatian.png
+error: Build input file cannot be found: '/Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle 2/PNGs/Delmatian.png'. Did you forget to declare this file as an output of a script phase or custom build rule which produces it? (in target 'Clippy' from project 'Clippy')
+
+** BUILD FAILED **
+
+
+The following build commands failed:
+	CpResource /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources/Husky.aseprite /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle\ 2/ASE/Husky.aseprite (in target 'Clippy' from project 'Clippy')
+	CpResource /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources/Labrador.aseprite /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle\ 2/ASE/Labrador.aseprite (in target 'Clippy' from project 'Clippy')
+	CpResource /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources/README.txt /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle\ 2/README.txt (in target 'Clippy' from project 'Clippy')
+	CpResource /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources/Delmatian.aseprite /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle\ 2/ASE/Delmatian.aseprite (in target 'Clippy' from project 'Clippy')
+	CpResource /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources/Corgi.aseprite /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle\ 2/ASE/Corgi.aseprite (in target 'Clippy' from project 'Clippy')
+	CpResource /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources/Collie.aseprite /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle\ 2/ASE/Collie.aseprite (in target 'Clippy' from project 'Clippy')
+	CopyPNGFile /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources/Labrador.png /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle\ 2/PNGs/Labrador.png (in target 'Clippy' from project 'Clippy')
+	CopyPNGFile /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources/Husky.png /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle\ 2/PNGs/Husky.png (in target 'Clippy' from project 'Clippy')
+	CopyPNGFile /Users/alhinai/Library/Developer/Xcode/DerivedData/Clippy-dkplsxaeaygufabpibzvflaeurkj/Build/Products/Debug/Clippy.app/Contents/Resources/Delmatian.png /Users/alhinai/.cursor/worktrees/IakHf/mSf7q/DogBundle\ 2/PNGs/Delmatian.png (in target 'Clippy' from project 'Clippy')
+	Building project Clippy with scheme Clippy
+(10 failures)
