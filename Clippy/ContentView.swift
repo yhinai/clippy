@@ -27,6 +27,11 @@ struct ContentView: View {
     @State private var geminiService: GeminiService = GeminiService(apiKey: "")
     @State private var localAIService: LocalAIService = LocalAIService()
     
+    // Voice Input State
+    @StateObject private var audioRecorder = AudioRecorder()
+    @State private var elevenLabsService: ElevenLabsService?
+    @State private var isRecordingVoice = false
+    
     // Navigation State
     @State private var selectedCategory: NavigationCategory? = .allItems
     @State private var selectedItem: Item?
@@ -78,6 +83,17 @@ struct ContentView: View {
                     get: { getStoredAPIKey() },
                     set: { saveAPIKey($0) }
                 ),
+                elevenLabsKey: Binding(
+                    get: { UserDefaults.standard.string(forKey: "ElevenLabs_API_Key") ?? "" },
+                    set: { 
+                        UserDefaults.standard.set($0, forKey: "ElevenLabs_API_Key")
+                        if !$0.isEmpty {
+                            elevenLabsService = ElevenLabsService(apiKey: $0)
+                        } else {
+                            elevenLabsService = nil
+                        }
+                    }
+                ),
                 selectedService: $selectedAIService
             )
         }
@@ -114,6 +130,12 @@ struct ContentView: View {
             geminiService = GeminiService(apiKey: storedKey)
         }
         
+        // Initialize ElevenLabs Service
+        let elevenLabsKey = getStoredElevenLabsKey()
+        if !elevenLabsKey.isEmpty {
+            elevenLabsService = ElevenLabsService(apiKey: elevenLabsKey)
+        }
+        
         Task {
             await embeddingService.initialize()
             clipboardMonitor.startMonitoring(
@@ -130,8 +152,51 @@ struct ContentView: View {
         hotkeyManager.startListening(
             onTrigger: { handleHotkeyTrigger() },
             onVisionTrigger: { handleVisionHotkeyTrigger() },
-            onTextCaptureTrigger: { handleTextCaptureTrigger() }
+            onTextCaptureTrigger: { handleTextCaptureTrigger() },
+            onVoiceCaptureTrigger: { toggleVoiceRecording() }
         )
+    }
+    
+    private func toggleVoiceRecording() {
+        if isRecordingVoice {
+            // STOP Recording & Process
+            isRecordingVoice = false
+            floatingDogController.setState(.thinking) // Dog looks like it's thinking
+            
+            guard let url = audioRecorder.stopRecording() else { return }
+            guard let service = elevenLabsService else {
+                floatingDogController.updateMessage("ElevenLabs API Key missing! 🔑")
+                return
+            }
+            
+            Task {
+                do {
+                    // 1. Transcribe via ElevenLabs
+                    let text = try await service.transcribe(audioFileURL: url)
+                    
+                    // 2. Feed into existing logic (same as typing)
+                    if !text.isEmpty {
+                        processCapturedText(text)
+                    } else {
+                        floatingDogController.updateMessage("I didn't catch that 👂")
+                    }
+                } catch {
+                    print("Voice Error: \(error.localizedDescription)")
+                    floatingDogController.updateMessage("Couldn't hear you 🙉")
+                }
+            }
+        } else {
+            // START Recording
+            // Check if service is available before starting
+            if elevenLabsService == nil {
+                floatingDogController.updateMessage("Set ElevenLabs API Key in Settings ⚙️")
+                return
+            }
+            
+            isRecordingVoice = true
+            _ = audioRecorder.startRecording()
+            floatingDogController.setState(.idle, message: "Listening... 🎙️")
+        }
     }
     
     // MARK: - Logic Handlers
@@ -318,6 +383,29 @@ struct ContentView: View {
         
         return ""
     }
+    
+    private func getStoredElevenLabsKey() -> String {
+        // 1. Check process environment
+        if let envKey = ProcessInfo.processInfo.environment["ELEVENLABS_API_KEY"], !envKey.isEmpty { return envKey }
+        
+        // 2. Check UserDefaults
+        if let stored = UserDefaults.standard.string(forKey: "ElevenLabs_API_Key"), !stored.isEmpty {
+            return stored
+        }
+        
+        // 3. Check local .env file manually (Fallback for development)
+        let envPath = URL(fileURLWithPath: #file).deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent(".env")
+        if let content = try? String(contentsOf: envPath, encoding: .utf8) {
+            let lines = content.components(separatedBy: .newlines)
+            for line in lines {
+                if line.starts(with: "ELEVENLABS_API_KEY=") {
+                    return line.replacingOccurrences(of: "ELEVENLABS_API_KEY=", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
+                }
+            }
+        }
+        
+        return ""
+    }
 }
 
 // MARK: - Settings View
@@ -325,9 +413,11 @@ struct ContentView: View {
 struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
     @Binding var apiKey: String
+    @Binding var elevenLabsKey: String
     @Binding var selectedService: AIServiceType
     
-    @State private var tempKey: String = ""
+    @State private var tempGeminiKey: String = ""
+    @State private var tempElevenLabsKey: String = ""
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -337,33 +427,49 @@ struct SettingsView: View {
             
             Divider()
             
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Gemini API Key")
-                    .font(.headline)
-                
-                SecureField("sk-...", text: $tempKey)
-                    .textFieldStyle(.roundedBorder)
-                    .onAppear { tempKey = apiKey }
-                
-                Text("Required for Gemini services. Keys are stored locally.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Gemini API Key")
+                            .font(.headline)
+                        
+                        SecureField("Enter Gemini API key...", text: $tempGeminiKey)
+                            .textFieldStyle(.roundedBorder)
+                            .onAppear { tempGeminiKey = apiKey }
+                        
+                        Text("Required for Gemini services. Keys are stored locally.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("ElevenLabs API Key")
+                            .font(.headline)
+                        
+                        SecureField("Enter ElevenLabs API key...", text: $tempElevenLabsKey)
+                            .textFieldStyle(.roundedBorder)
+                            .onAppear { tempElevenLabsKey = elevenLabsKey }
+                        
+                        Text("Required for voice input (Option+Space). Keys are stored locally.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
             }
-            
-            Spacer()
             
             HStack {
                 Button("Cancel") { dismiss() }
                 Spacer()
                 Button("Save") {
-                    apiKey = tempKey
+                    apiKey = tempGeminiKey
+                    elevenLabsKey = tempElevenLabsKey
                     dismiss()
                 }
                 .buttonStyle(.borderedProminent)
             }
         }
         .padding(24)
-        .frame(width: 400, height: 250)
+        .frame(width: 450, height: 350)
     }
 }
 

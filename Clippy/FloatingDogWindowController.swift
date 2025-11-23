@@ -47,12 +47,15 @@ class FloatingDogWindowController: ObservableObject {
             )
             
             // Position near text input if enabled (do this BEFORE showing)
-            if self.followTextInput {
-                self.positionNearActiveTextInput()
-            } else {
-                // Fallback to centered position
-                if let window = self.window {
-                    self.positionWindowCentered(window)
+            // Only reposition if window is not already visible to allow user to drag it
+            if !self.isVisible {
+                if self.followTextInput {
+                    self.positionNearActiveTextInput()
+                } else {
+                    // Fallback to centered position
+                    if let window = self.window {
+                        self.positionWindowCentered(window)
+                    }
                 }
             }
             
@@ -117,7 +120,8 @@ class FloatingDogWindowController: ObservableObject {
         window.backgroundColor = NSColor.clear
         window.hasShadow = false
         window.level = .floating
-        window.ignoresMouseEvents = true
+        window.ignoresMouseEvents = false
+        window.isMovableByWindowBackground = true
         window.collectionBehavior = [.canJoinAllSpaces, .stationary]
         
         // Ensure content view is transparent

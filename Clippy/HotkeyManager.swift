@@ -11,11 +11,13 @@ class HotkeyManager: ObservableObject {
     private var onTrigger: (() -> Void)?
     private var onVisionTrigger: (() -> Void)?
     private var onTextCaptureTrigger: (() -> Void)?
+    private var onVoiceCaptureTrigger: (() -> Void)?
     
-    func startListening(onTrigger: @escaping () -> Void, onVisionTrigger: @escaping () -> Void, onTextCaptureTrigger: @escaping () -> Void) {
+    func startListening(onTrigger: @escaping () -> Void, onVisionTrigger: @escaping () -> Void, onTextCaptureTrigger: @escaping () -> Void, onVoiceCaptureTrigger: @escaping () -> Void) {
         self.onTrigger = onTrigger
         self.onVisionTrigger = onVisionTrigger
         self.onTextCaptureTrigger = onTextCaptureTrigger
+        self.onVoiceCaptureTrigger = onVoiceCaptureTrigger
         
         let eventMask = (1 << CGEventType.keyDown.rawValue)
         
@@ -34,6 +36,15 @@ class HotkeyManager: ObservableObject {
                     print("⌨️ [HotkeyManager] Option+X detected!")
                     DispatchQueue.main.async {
                         manager.onTextCaptureTrigger?()
+                    }
+                    return nil // Consume event
+                }
+                
+                // Check for Option+Space (voice capture trigger)
+                if event.flags.contains(.maskAlternate) && event.getIntegerValueField(.keyboardEventKeycode) == 49 { // 49 = Space
+                    print("🎙️ [HotkeyManager] Option+Space detected!")
+                    DispatchQueue.main.async {
+                        manager.onVoiceCaptureTrigger?()
                     }
                     return nil // Consume event
                 }

@@ -22,6 +22,8 @@
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
 	<key>NSAccessibilityUsageDescription</key>
 	<string>Clippy requires accessibility access to monitor clipboard changes, detect cursor position, and provide contextual suggestions based on your current activity.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Clippy requires microphone access to listen to your voice commands for querying your clipboard history.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Clippy requires screen recording access to analyze on-screen content and provide contextual clipboard suggestions.</string>
 	<key>NSHumanReadableCopyright</key>
