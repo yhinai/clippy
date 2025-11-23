@@ -5,3 +5,6 @@ DogBundle 2
 profile.txt
 .env
 local.env
+.DS_Store
+DerivedData/
+*.xcodeproj/project.xcworkspace/xcuserdata/
