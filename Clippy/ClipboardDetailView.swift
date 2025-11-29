@@ -7,13 +7,7 @@ struct ClipboardDetailView: View {
     @EnvironmentObject var embeddingService: EmbeddingService
     @State private var newTagInput: String = ""
     @State private var isEditingTags: Bool = false
-    
-    // We need to access the embedding service to delete vectors when deleting items
-    // But deleting is usually done from the list or via a closure. 
-    // For this view, I'll just handle the visual editing. 
-    // The delete action might need to be passed in or handled by environment object if we want to use the service.
-    // I'll use the ClipboardService singleton, but it needs the embedding service instance.
-    // For now, I'll focus on the UI and basic model updates.
+    @State private var showCopiedFeedback: Bool = false
     
     var body: some View {
         ScrollView {
@@ -62,6 +56,22 @@ struct ClipboardDetailView: View {
                             .cornerRadius(12)
                             .textSelection(.enabled)
                     }
+                    
+                    // Prominent Copy Button
+                    Button(action: copyContentWithFeedback) {
+                        HStack {
+                            Image(systemName: showCopiedFeedback ? "checkmark.circle.fill" : "doc.on.clipboard.fill")
+                            Text(showCopiedFeedback ? "Copied!" : "Copy to Clipboard")
+                                .fontWeight(.medium)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(showCopiedFeedback ? Color.green : Color.accentColor)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                    }
+                    .buttonStyle(.plain)
+                    .animation(.easeInOut(duration: 0.2), value: showCopiedFeedback)
                 }
                 
                 // Tags Section
@@ -157,6 +167,22 @@ struct ClipboardDetailView: View {
             ClipboardService.shared.copyImageToClipboard(imagePath: imagePath)
         } else {
             ClipboardService.shared.copyTextToClipboard(item.content)
+        }
+    }
+    
+    private func copyContentWithFeedback() {
+        copyContent()
+        
+        // Show feedback
+        withAnimation {
+            showCopiedFeedback = true
+        }
+        
+        // Reset after delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            withAnimation {
+                showCopiedFeedback = false
+            }
         }
     }
     

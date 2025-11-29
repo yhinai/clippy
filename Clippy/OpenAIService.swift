@@ -166,10 +166,17 @@ class OpenAIService: ObservableObject {
         3. Do NOT add commentary about API calls, processing, or system operations
         4. If question is not about clipboard content, return empty string
         5. Keep answer concise and directly relevant
+        6. **RETURN ONLY THE DIRECT ANSWER** - No conversational wrapper like "Your X is" or "The X is"
+        
+        ANSWER FORMAT EXAMPLES:
+        - "what is my email?" → Return: "yahya.s.alhinai@gmail.com" (NOT "Your email is...")
+        - "what is my name?" → Return: "John Smith" (NOT "Your name is...")
+        - "what is the tracking number?" → Return: "1ZAC65432428054431" (NOT "The tracking number is...")
+        - "what was that code?" → Return the actual code snippet (NOT "Here is the code...")
         
         OUTPUT FORMAT - Return ONLY this JSON structure:
         {
-          "A": "your text answer here (empty if pasting image)",
+          "A": "direct answer only - no preamble",
           "paste_image": 0
         }
         

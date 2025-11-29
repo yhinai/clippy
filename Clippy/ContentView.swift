@@ -323,12 +323,14 @@ struct ContentView: View {
             }
             
             await MainActor.run {
-                handleAIResponse(answer: answer, imageIndex: imageIndex, recentItems: recentItems)
+                // Check for errors and get error message
+                let errorMessage = geminiService.lastErrorMessage
+                handleAIResponse(answer: answer, imageIndex: imageIndex, recentItems: recentItems, errorMessage: errorMessage)
             }
         }
     }
     
-    private func handleAIResponse(answer: String?, imageIndex: Int?, recentItems: [Item]) {
+    private func handleAIResponse(answer: String?, imageIndex: Int?, recentItems: [Item], errorMessage: String? = nil) {
         // Calculate how long we've been in thinking state
         let elapsed = Date().timeIntervalSince(thinkingStartTime ?? Date())
         let remainingDelay = max(0, 3.0 - elapsed) // Minimum 3 seconds of thinking
@@ -339,6 +341,16 @@ struct ContentView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + remainingDelay) {
             self.isProcessingAnswer = false
             self.thinkingStartTime = nil // Reset thinking timer
+            
+            // Check if there was an error
+            if let errorMessage = errorMessage {
+                self.floatingDogController.setState(.error, message: "❌ \(errorMessage)")
+                // Auto-hide after showing error
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                    self.floatingDogController.hide()
+                }
+                return
+            }
             
             // Transition to done state
             self.floatingDogController.setState(.done)

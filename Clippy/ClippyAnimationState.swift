@@ -6,6 +6,7 @@ enum ClippyAnimationState {
     case writing   // User is typing text
     case thinking  // AI is processing the query (minimum 3 seconds)
     case done      // AI has completed processing
+    case error     // An error occurred (API failure, etc.)
     
     /// The GIF file name for this animation state
     var gifFileName: String {
@@ -18,6 +19,8 @@ enum ClippyAnimationState {
             return "clippy-thinking"
         case .done:
             return "clippy-done"
+        case .error:
+            return "clippy-idle" // Use idle animation for errors
         }
     }
     
@@ -32,6 +35,8 @@ enum ClippyAnimationState {
             return "Thinking..."
         case .done:
             return "Done!"
+        case .error:
+            return "Oops! Something went wrong"
         }
     }
 }

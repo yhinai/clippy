@@ -26,25 +26,36 @@ class FloatingDogWindowController: ObservableObject {
                 self.createWindow()
             }
             
-            // Update the view content with new state
-            self.hostingController?.rootView = AnyView(
-                ZStack(alignment: .topTrailing) {
-                    ClippyGifPlayer(gifName: gifName)
-                        .id(gifName) // FORCE VIEW REFRESH
-                        .frame(width: 124, height: 93) // Standard Clippy size
-                    
-                    // Speech bubble
-                    if !displayMessage.isEmpty {
-                        Text(displayMessage)
+                // Update the view content with new state
+                self.hostingController?.rootView = AnyView(
+                    ZStack(alignment: .topTrailing) {
+                        ClippyGifPlayer(gifName: gifName)
+                            .id(gifName) // FORCE VIEW REFRESH
+                            .frame(width: 124, height: 93) // Standard Clippy size
+                        
+                        // Speech bubble with optional loading spinner
+                        if !displayMessage.isEmpty || state == .thinking {
+                            HStack(spacing: 6) {
+                                // Show spinner during thinking state
+                                if state == .thinking {
+                                    ProgressView()
+                                        .scaleEffect(0.6)
+                                        .frame(width: 12, height: 12)
+                                }
+                                
+                                if !displayMessage.isEmpty {
+                                    Text(displayMessage)
+                                }
+                            }
                             .padding(8)
-                            .background(Color.yellow.opacity(0.9))
+                            .background(state == .error ? Color.red.opacity(0.9) : Color.yellow.opacity(0.9))
                             .cornerRadius(8)
                             .foregroundColor(.black)
                             .font(.caption)
                             .offset(x: -100, y: -50) // Offset to left of Clippy
+                        }
                     }
-                }
-            )
+                )
             
             // Position near text input if enabled (do this BEFORE showing)
             // Only reposition if window is not already visible to allow user to drag it

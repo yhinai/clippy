@@ -20,6 +20,7 @@ struct GeminiAPIResponse: Codable {
 class GeminiService: ObservableObject {
     @Published var isProcessing = false
     @Published var lastError: String?
+    @Published var lastErrorMessage: String? // User-friendly error message
     
     private let apiKey: String
     private let baseURL = "https://generativelanguage.googleapis.com/v1beta/models"
@@ -27,6 +28,17 @@ class GeminiService: ObservableObject {
     
     init(apiKey: String) {
         self.apiKey = apiKey
+    }
+    
+    /// Check if API key is configured
+    var hasValidAPIKey: Bool {
+        !apiKey.isEmpty
+    }
+    
+    /// Clear the last error
+    func clearError() {
+        lastError = nil
+        lastErrorMessage = nil
     }
     
     /// Generate an answer based on user question and clipboard context
@@ -128,10 +140,17 @@ class GeminiService: ObservableObject {
         3. Do NOT add commentary about API calls, processing, or system operations
         4. If question is not about clipboard content, return empty string
         5. Keep answer concise and directly relevant
+        6. **RETURN ONLY THE DIRECT ANSWER** - No conversational wrapper like "Your X is" or "The X is"
+        
+        ANSWER FORMAT EXAMPLES:
+        - "what is my email?" → Return: "yahya.s.alhinai@gmail.com" (NOT "Your email is...")
+        - "what is my name?" → Return: "John Smith" (NOT "Your name is...")
+        - "what is the tracking number?" → Return: "1ZAC65432428054431" (NOT "The tracking number is...")
+        - "what was that code?" → Return the actual code snippet (NOT "Here is the code...")
         
         OUTPUT FORMAT - Return ONLY this JSON structure:
         {
-          "A": "your text answer here (empty if pasting image)",
+          "A": "direct answer only - no preamble",
           "paste_image": 0
         }
         
@@ -176,6 +195,7 @@ class GeminiService: ObservableObject {
     private func callGeminiForAnswerWithImage(prompt: String) async -> (String?, Int?)? {
         guard !apiKey.isEmpty else {
             print("   ⚠️  No valid API key configured")
+            lastErrorMessage = "API key not configured. Go to Settings to add your Gemini API key."
             return nil
         }
         
@@ -184,6 +204,7 @@ class GeminiService: ObservableObject {
         // Construct request URL
         guard let url = URL(string: "\(baseURL)/\(modelName):generateContent?key=\(apiKey)") else {
             lastError = "Invalid URL"
+            lastErrorMessage = "Configuration error"
             return nil
         }
         
@@ -213,6 +234,7 @@ class GeminiService: ObservableObject {
             
             guard let httpResponse = response as? HTTPURLResponse else {
                 lastError = "Invalid response"
+                lastErrorMessage = "Network error - invalid response"
                 return nil
             }
             
@@ -221,9 +243,27 @@ class GeminiService: ObservableObject {
             guard httpResponse.statusCode == 200 else {
                 let errorMessage = String(data: data, encoding: .utf8) ?? "Unknown error"
                 lastError = "API Error (\(httpResponse.statusCode)): \(errorMessage)"
+                
+                // Set user-friendly error message
+                switch httpResponse.statusCode {
+                case 400:
+                    lastErrorMessage = "Bad request - check your query"
+                case 401, 403:
+                    lastErrorMessage = "Invalid API key. Check Settings."
+                case 429:
+                    lastErrorMessage = "Rate limited. Try again later."
+                case 500...599:
+                    lastErrorMessage = "Gemini server error. Try again."
+                default:
+                    lastErrorMessage = "API error (\(httpResponse.statusCode))"
+                }
+                
                 print("   ❌ API Error: \(errorMessage)")
                 return nil
             }
+            
+            // Clear any previous errors on success
+            lastErrorMessage = nil
             
             // Parse response
             let decoder = JSONDecoder()
@@ -266,8 +306,24 @@ class GeminiService: ObservableObject {
             // Fallback
             return (text.trimmingCharacters(in: .whitespacesAndNewlines), nil)
             
+        } catch let error as URLError {
+            lastError = error.localizedDescription
+            // User-friendly network error messages
+            switch error.code {
+            case .notConnectedToInternet:
+                lastErrorMessage = "No internet connection"
+            case .timedOut:
+                lastErrorMessage = "Request timed out. Try again."
+            case .networkConnectionLost:
+                lastErrorMessage = "Connection lost. Try again."
+            default:
+                lastErrorMessage = "Network error. Check connection."
+            }
+            print("   ❌ Network Error: \(error)")
+            return nil
         } catch {
             lastError = error.localizedDescription
+            lastErrorMessage = "Something went wrong. Try again."
             print("   ❌ Error: \(error)")
             return nil
         }

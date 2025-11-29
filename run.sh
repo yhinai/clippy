@@ -9,6 +9,14 @@ NC='\033[0m' # No Color
 echo -e "${GREEN}🐶 Clippy Build & Run Script${NC}"
 echo "=============================="
 
+# 0. Kill all existing Clippy processes
+echo -e "\n${GREEN}🔪 Step 0: Killing existing Clippy processes...${NC}"
+pkill -9 -if "[Cc]lippy" 2>/dev/null
+killall -9 Clippy 2>/dev/null
+killall -9 clippy 2>/dev/null
+sleep 1
+echo -e "${GREEN}✅ All Clippy processes killed${NC}"
+
 # 1. Verification
 echo -e "\n${GREEN}🔍 Step 1: Verifying Integrity...${NC}"
 if [ -f "scripts/verify_integrity.py" ]; then

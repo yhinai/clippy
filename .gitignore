@@ -1,10 +1,45 @@
-.vscode
-.build
-build
-DogBundle 2
-profile.txt
-.env
-local.env
-.DS_Store
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Build artifacts
+.build/
+build/
 DerivedData/
 *.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+
+# Python
+SpoonBackend/venv/
+SpoonBackend/__pycache__/
+SpoonBackend/*.pyc
+SpoonBackend/*.pyo
+SpoonBackend/.pytest_cache/
+*.egg-info/
+__pycache__/
+
+# Logs
+SpoonBackend/server.log
+*.log
+
+# Environment & Config
+.env
+local.env
+.env.local
+.env.*.local
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Temporary & Test
+profile.txt
+DogBundle 2
+tmp/
+temp/
+*.tmp
