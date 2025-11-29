@@ -7,38 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		7C1ADD302E9900000075A000 /* map.png in Resources */ = {isa = PBXBuildFile; fileRef = 7C1ADD312E9900000075A000 /* map.png */; };
-		7C1ADD322E9900000075A000 /* agent.js in Resources */ = {isa = PBXBuildFile; fileRef = 7C1ADD332E9900000075A000 /* agent.js */; };
 		7CD28A0F2E9651760075A000 /* VecturaKit in Frameworks */ = {isa = PBXBuildFile; productRef = 7CD28A0E2E9651760075A000 /* VecturaKit */; };
 		7CD28A112E9651760075A000 /* VecturaMLXKit in Frameworks */ = {isa = PBXBuildFile; productRef = 7CD28A102E9651760075A000 /* VecturaMLXKit */; };
-		7CD28ADA2E98EB620075A000 /* Collie.aseprite in Resources */ = {isa = PBXBuildFile; fileRef = 7CD28ACC2E98EB620075A000 /* Collie.aseprite */; };
-		7CD28ADB2E98EB620075A000 /* Husky.aseprite in Resources */ = {isa = PBXBuildFile; fileRef = 7CD28ACF2E98EB620075A000 /* Husky.aseprite */; };
-		7CD28ADC2E98EB620075A000 /* Labrador.aseprite in Resources */ = {isa = PBXBuildFile; fileRef = 7CD28AD02E98EB620075A000 /* Labrador.aseprite */; };
-		7CD28ADD2E98EB620075A000 /* Delmatian.aseprite in Resources */ = {isa = PBXBuildFile; fileRef = 7CD28ACE2E98EB620075A000 /* Delmatian.aseprite */; };
-		7CD28ADE2E98EB620075A000 /* Labrador.png in Resources */ = {isa = PBXBuildFile; fileRef = 7CD28AD62E98EB620075A000 /* Labrador.png */; };
-		7CD28ADF2E98EB620075A000 /* Delmatian.png in Resources */ = {isa = PBXBuildFile; fileRef = 7CD28AD42E98EB620075A000 /* Delmatian.png */; };
-		7CD28AE02E98EB620075A000 /* Collie.png in Resources */ = {isa = PBXBuildFile; fileRef = 7CD28AD22E98EB620075A000 /* Collie.png */; };
-		7CD28AE12E98EB620075A000 /* Corgi.aseprite in Resources */ = {isa = PBXBuildFile; fileRef = 7CD28ACD2E98EB620075A000 /* Corgi.aseprite */; };
-		7CD28AE22E98EB620075A000 /* Corgi.png in Resources */ = {isa = PBXBuildFile; fileRef = 7CD28AD32E98EB620075A000 /* Corgi.png */; };
-		7CD28AE32E98EB620075A000 /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7CD28AD82E98EB620075A000 /* README.txt */; };
-		7CD28AE42E98EB620075A000 /* Husky.png in Resources */ = {isa = PBXBuildFile; fileRef = 7CD28AD52E98EB620075A000 /* Husky.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		7C1ADD162E962B920014E10D /* Clippy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Clippy.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		7C1ADD312E9900000075A000 /* map.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Clippy/map.png"; sourceTree = "<group>"; };
-		7C1ADD332E9900000075A000 /* agent.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Clippy/agent.js"; sourceTree = "<group>"; };
-		7CD28ACC2E98EB620075A000 /* Collie.aseprite */ = {isa = PBXFileReference; lastKnownFileType = file; path = Collie.aseprite; sourceTree = "<group>"; };
-		7CD28ACD2E98EB620075A000 /* Corgi.aseprite */ = {isa = PBXFileReference; lastKnownFileType = file; path = Corgi.aseprite; sourceTree = "<group>"; };
-		7CD28ACE2E98EB620075A000 /* Delmatian.aseprite */ = {isa = PBXFileReference; lastKnownFileType = file; path = Delmatian.aseprite; sourceTree = "<group>"; };
-		7CD28ACF2E98EB620075A000 /* Husky.aseprite */ = {isa = PBXFileReference; lastKnownFileType = file; path = Husky.aseprite; sourceTree = "<group>"; };
-		7CD28AD02E98EB620075A000 /* Labrador.aseprite */ = {isa = PBXFileReference; lastKnownFileType = file; path = Labrador.aseprite; sourceTree = "<group>"; };
-		7CD28AD22E98EB620075A000 /* Collie.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Collie.png; sourceTree = "<group>"; };
-		7CD28AD32E98EB620075A000 /* Corgi.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Corgi.png; sourceTree = "<group>"; };
-		7CD28AD42E98EB620075A000 /* Delmatian.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Delmatian.png; sourceTree = "<group>"; };
-		7CD28AD52E98EB620075A000 /* Husky.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Husky.png; sourceTree = "<group>"; };
-		7CD28AD62E98EB620075A000 /* Labrador.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Labrador.png; sourceTree = "<group>"; };
-		7CD28AD82E98EB620075A000 /* README.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -65,13 +39,8 @@
 		7C1ADD0D2E962B920014E10D = {
 			isa = PBXGroup;
 			children = (
-				7CD28AE62E98F1E90075A000 /* CuteDog.mov */,
 				7C1ADD182E962B920014E10D /* Clippy */,
 				7C1ADD172E962B920014E10D /* Products */,
-				7CD28AE72E98FA790075A000 /* CuteDog.gif */,
-				7C1ADD312E9900000075A000 /* map.png */,
-				7C1ADD332E9900000075A000 /* agent.js */,
-				7CD28AF22E9900000075A000 /* ClippyGifs */,
 			);
 			sourceTree = "<group>";
 		};
@@ -81,40 +50,6 @@
 				7C1ADD162E962B920014E10D /* Clippy.app */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		7CD28AD12E98EB620075A000 /* ASE */ = {
-			isa = PBXGroup;
-			children = (
-				7CD28ACC2E98EB620075A000 /* Collie.aseprite */,
-				7CD28ACD2E98EB620075A000 /* Corgi.aseprite */,
-				7CD28ACE2E98EB620075A000 /* Delmatian.aseprite */,
-				7CD28ACF2E98EB620075A000 /* Husky.aseprite */,
-				7CD28AD02E98EB620075A000 /* Labrador.aseprite */,
-			);
-			path = ASE;
-			sourceTree = "<group>";
-		};
-		7CD28AD72E98EB620075A000 /* PNGs */ = {
-			isa = PBXGroup;
-			children = (
-				7CD28AD22E98EB620075A000 /* Collie.png */,
-				7CD28AD32E98EB620075A000 /* Corgi.png */,
-				7CD28AD42E98EB620075A000 /* Delmatian.png */,
-				7CD28AD52E98EB620075A000 /* Husky.png */,
-				7CD28AD62E98EB620075A000 /* Labrador.png */,
-			);
-			path = PNGs;
-			sourceTree = "<group>";
-		};
-		7CD28AD92E98EB620075A000 /* DogBundle 2 */ = {
-			isa = PBXGroup;
-			children = (
-				7CD28AD12E98EB620075A000 /* ASE */,
-				7CD28AD72E98EB620075A000 /* PNGs */,
-				7CD28AD82E98EB620075A000 /* README.txt */,
-			);
-			path = "DogBundle 2";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -186,9 +121,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7CD28AF02E9900000075A000 /* map.png in Resources */,
-				7CD28AF12E9900000075A000 /* agent.js in Resources */,
-				7CD28AE62E98F1E90075A000 /* CuteDog.mov in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

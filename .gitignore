@@ -1,6 +1,7 @@
 # IDE & Editor
 .vscode/
 .idea/
+.trae/
 *.swp
 *.swo
 *~
@@ -13,16 +14,14 @@ DerivedData/
 *.xcodeproj/xcuserdata/
 
 # Python
-SpoonBackend/venv/
-SpoonBackend/__pycache__/
-SpoonBackend/*.pyc
-SpoonBackend/*.pyo
-SpoonBackend/.pytest_cache/
-*.egg-info/
 __pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+venv/
 
 # Logs
-SpoonBackend/server.log
 *.log
 
 # Environment & Config
@@ -38,8 +37,6 @@ local.env
 ._*
 
 # Temporary & Test
-profile.txt
-DogBundle 2
 tmp/
 temp/
 *.tmp
