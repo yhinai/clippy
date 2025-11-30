@@ -15,18 +15,23 @@ class Clippy: ObservableObject {
         print("🚀 [Clippy] Initializing...")
         do {
             let config = VecturaConfig(
-                name: "pastepup-clipboard",
-                dimension: nil as Int? // Auto-detect from model
+                name: "clippy-clipboard",
+                dimension: 384 // MiniLM uses 384 dimensions
+            )
+            
+            // Fallback: Use standard MiniLM which is reliable
+            let modelConfig = ModelConfiguration(
+                id: "sentence-transformers/all-MiniLM-L6-v2"
             )
             
             vectorDB = try await VecturaMLXKit(
                 config: config,
-                modelConfiguration: .qwen3_embedding
+                modelConfiguration: modelConfig
             )
              
             isInitialized = true
-            statusMessage = "Ready (Qwen3-Embedding-0.6B)"
-            print("✅ [Clippy] Initialized successfully with Qwen3")
+            statusMessage = "Ready (Fallback: MiniLM-L6-v2)"
+            print("✅ [Clippy] Initialized successfully with all-MiniLM-L6-v2")
         } catch {
             statusMessage = "Failed to initialize: \(error.localizedDescription)"
             print("❌ [Clippy] Initialization error: \(error)")

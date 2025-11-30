@@ -10,7 +10,7 @@ enum AIServiceType: String, CaseIterable {
         case .gemini:
             return "Gemini 2.5 Flash (Cloud)"
         case .local:
-            return "Local Qwen3-4b (On-device)"
+            return "Qwen3 4B (Thinking Mode)"
         }
     }
 }

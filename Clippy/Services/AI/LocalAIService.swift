@@ -53,8 +53,8 @@ class LocalAIService: ObservableObject {
     private let model: String
     
     // Default configuration
-    private static let defaultEndpoint = "http://10.0.0.138:1234/v1/chat/completions"
-    private static let defaultModel = "qwen/qwen3-4b"
+    private static let defaultEndpoint = "http://localhost:8080/v1/chat/completions"
+    private static let defaultModel = "mlx-community/Qwen3-4B-Thinking-2507-4bit"
     
     init(endpoint: String = LocalAIService.defaultEndpoint, model: String = LocalAIService.defaultModel) {
         self.endpoint = endpoint
@@ -126,39 +126,10 @@ class LocalAIService: ObservableObject {
         }
         
         let prompt = """
-        You are a Clippy assistant. You only answer questions about the clipboard history. You don't answer questions about other topics. Answer the user's question based on the provided context from their clipboard history. /no_think
-        
-        User Question: \(question)
-        
-        Clipboard Context (with semantic tags for better understanding):
+        Context:
         \(contextText)
         
-        App: \(appName ?? "Unknown")
-        
-        Instructions:
-        - Extract and return ONLY the specific information requested in the question
-        - DO NOT add any preamble, explanation, or extra words
-        - DO NOT say things like "The tracking number is..." or "Your answer is..."
-        - Just return the raw requested data with NO additional text
-        - Use the semantic tags to better understand the context and relevance of each clipboard item
-        - If the clipboard context is not relevant, return an empty string
-        - Keep the answer minimal and direct
-        - Do not include any meta-commentary about the clipboard or context
-        
-        Examples:
-        - Question: "tracking number" → Answer: "1ZAC65432428054431" (NOT "Your tracking number is 1ZAC65432428054431")
-        - Question: "email address" → Answer: "user@example.com" (NOT "The email address is user@example.com")
-        - Question: "what is the total?" → Answer: "$42.50" (NOT "The total is $42.50")
-        
-        Return your answer in JSON format:
-        {
-          "A": "your answer here"
-        }
-
-        If question is not about the clipboard history, return an empty string as your answer:
-        {"A": ""}
-        
-        Return ONLY the JSON with the raw answer, nothing else. No preamble, no explanations, no additional text.
+        Question: \(question)
         """
         
         return prompt
@@ -204,6 +175,10 @@ class LocalAIService: ObservableObject {
         let requestBody: [String: Any] = [
             "model": model,
             "messages": [
+                [
+                    "role": "system",
+                    "content": "You are Clippy, an intelligent clipboard assistant. Analyze the clipboard context deeply to answer the user's question. Return ONLY a JSON object with the answer in the 'A' field."
+                ],
                 [
                     "role": "user",
                     "content": prompt
