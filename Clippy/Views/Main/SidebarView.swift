@@ -18,7 +18,7 @@ enum NavigationCategory: String, CaseIterable, Identifiable {
 struct SidebarView: View {
     @Binding var selection: NavigationCategory?
     @Binding var selectedAIService: AIServiceType
-    @ObservedObject var floatingDogController: FloatingDogWindowController
+    @ObservedObject var clippyController: ClippyWindowController
     @Binding var showSettings: Bool
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject var clippy: Clippy
@@ -95,7 +95,7 @@ struct SidebarView: View {
                     
                     Spacer()
                     
-                    Toggle("", isOn: $floatingDogController.followTextInput)
+                    Toggle("", isOn: $clippyController.followTextInput)
                         .toggleStyle(.switch)
                         .labelsHidden()
                 }

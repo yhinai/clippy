@@ -102,18 +102,35 @@ class ClipboardMonitor: ObservableObject {
     
     private func updateCurrentApp() {
         guard let frontmostApp = NSWorkspace.shared.frontmostApplication else {
-            currentAppName = "Unknown"
-            currentWindowTitle = ""
-            accessibilityContext = hasAccessibilityPermission ? "" : "Accessibility permission not granted."
+            if currentAppName != "Unknown" { currentAppName = "Unknown" }
+            if currentWindowTitle != "" { currentWindowTitle = "" }
+            let newContext = hasAccessibilityPermission ? "" : "Accessibility permission not granted."
+            if accessibilityContext != newContext { accessibilityContext = newContext }
             return
         }
-        currentAppName = frontmostApp.localizedName ?? "Unknown App"
+        
+        let newAppName = frontmostApp.localizedName ?? "Unknown App"
+        if currentAppName != newAppName {
+            currentAppName = newAppName
+        }
+        
+        let newWindowTitle: String
+        let newContext: String
+        
         if hasAccessibilityPermission {
-            currentWindowTitle = getActiveWindowTitle() ?? ""
-            accessibilityContext = buildAccessibilityContext(for: frontmostApp)
+            newWindowTitle = getActiveWindowTitle() ?? ""
+            newContext = buildAccessibilityContext(for: frontmostApp)
         } else {
-            currentWindowTitle = frontmostApp.localizedName ?? ""
-            accessibilityContext = "Accessibility permission not granted."
+            newWindowTitle = frontmostApp.localizedName ?? ""
+            newContext = "Accessibility permission not granted."
+        }
+        
+        if currentWindowTitle != newWindowTitle {
+            currentWindowTitle = newWindowTitle
+        }
+        
+        if accessibilityContext != newContext {
+            accessibilityContext = newContext
         }
     }
     

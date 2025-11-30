@@ -6,51 +6,85 @@ struct ClipboardListView: View {
     var category: NavigationCategory?
     var searchText: String
     
-    @Query private var items: [Item]
+    @EnvironmentObject var clippy: Clippy
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: \Item.timestamp, order: .reverse) private var allItems: [Item]
     
-    init(selectedItem: Binding<Item?>, category: NavigationCategory?, searchText: String) {
-        _selectedItem = selectedItem
-        self.category = category
-        self.searchText = searchText
-        
-        let isFavorite = category == .favorites
-        let search = searchText
-        
-        // Construct predicate based on category and search text
-        // Note: Handling optionals in Predicates can be tricky. simplified for robustness.
-        
-        if search.isEmpty {
-            if isFavorite {
-                _items = Query(filter: #Predicate<Item> { item in
-                    item.isFavorite
-                }, sort: \.timestamp, order: .reverse)
-            } else {
-                _items = Query(sort: \.timestamp, order: .reverse)
-            }
-        } else {
-            if isFavorite {
-                _items = Query(filter: #Predicate<Item> { item in
-                    item.isFavorite && item.content.contains(search)
-                }, sort: \.timestamp, order: .reverse)
-            } else {
-                _items = Query(filter: #Predicate<Item> { item in
-                    item.content.contains(search)
-                }, sort: \.timestamp, order: .reverse)
-            }
-        }
-    }
+    @State private var searchResults: [Item] = []
+    @State private var isSearching = false
     
     var body: some View {
         List(selection: $selectedItem) {
-            // Section by date could be done here if we fetched all and grouped
-            // For now, flat list as per basic requirements, maybe section later if requested
-            ForEach(items) { item in
-                ClipboardItemRow(item: item)
-                    .tag(item)
+            if searchText.isEmpty {
+                // Normal List View
+                ForEach(filteredItems) { item in
+                    ClipboardItemRow(item: item)
+                        .tag(item)
+                }
+            } else {
+                // Search Results View
+                if isSearching {
+                    HStack {
+                        Spacer()
+                        ProgressView("Searching...")
+                            .scaleEffect(0.8)
+                        Spacer()
+                    }
+                    .listRowSeparator(.hidden)
+                } else if searchResults.isEmpty {
+                    ContentUnavailableView.search(text: searchText)
+                } else {
+                    ForEach(searchResults) { item in
+                        ClipboardItemRow(item: item)
+                            .tag(item)
+                    }
+                }
             }
         }
         .listStyle(.inset)
         .navigationTitle(category?.rawValue ?? "Clipboard")
+        .onChange(of: searchText) { _, newValue in
+            performSearch(query: newValue)
+        }
+    }
+    
+    // Filter items based on category (when not searching)
+    private var filteredItems: [Item] {
+        if let category = category, category == .favorites {
+            return allItems.filter { $0.isFavorite }
+        }
+        return allItems
+    }
+    
+    private func performSearch(query: String) {
+        guard !query.isEmpty else {
+            searchResults = []
+            isSearching = false
+            return
+        }
+        
+        isSearching = true
+        
+        Task {
+            // 1. Perform semantic search
+            let results = await clippy.search(query: query, limit: 20)
+            
+            // 2. Map IDs back to Items
+            let ids = results.map { $0.0 }
+            
+            await MainActor.run {
+                // Efficiently find items in current loaded list
+                // Note: For very large datasets, we might need a direct fetch by ID
+                let foundItems = allItems.filter { ids.contains($0.vectorId ?? UUID()) }
+                
+                // Sort by the order returned from search (relevance)
+                self.searchResults = ids.compactMap { id in
+                    foundItems.first(where: { $0.vectorId == id })
+                }
+                
+                self.isSearching = false
+            }
+        }
     }
 }
 

@@ -22,7 +22,7 @@ struct ContentView: View {
     @StateObject private var hotkeyManager = HotkeyManager()
     @StateObject private var visionParser = VisionScreenParser()
     @StateObject private var textCaptureService = TextCaptureService()
-    @StateObject private var floatingDogController = FloatingDogWindowController()
+    @StateObject private var clippyController = ClippyWindowController()
     
     @State private var geminiService: GeminiService = GeminiService(apiKey: "")
     @State private var localAIService: LocalAIService = LocalAIService()
@@ -52,7 +52,7 @@ struct ContentView: View {
             SidebarView(
                 selection: $selectedCategory,
                 selectedAIService: $selectedAIService,
-                floatingDogController: floatingDogController,
+                clippyController: clippyController,
                 showSettings: $showSettings
             )
         } content: {
@@ -186,7 +186,7 @@ struct ContentView: View {
         // Reset UI state
         if activeInputMode != .none {
             // Only hide if we were actually doing something
-            floatingDogController.hide()
+            clippyController.hide()
         }
         
         activeInputMode = .none
@@ -207,7 +207,7 @@ struct ContentView: View {
         resetInputState()
         activeInputMode = .visionCapture
         
-        floatingDogController.setState(.thinking, message: "Capturing screen... 📸")
+        clippyController.setState(.thinking, message: "Capturing screen... 📸")
         
         visionParser.parseCurrentScreen { result in
             DispatchQueue.main.async {
@@ -217,16 +217,16 @@ struct ContentView: View {
                     print("   Extracted \(parsedContent.fullText.count) characters")
                     if !parsedContent.fullText.isEmpty {
                         self.saveVisionContent(parsedContent.fullText)
-                        self.floatingDogController.setState(.done, message: "Saved \(parsedContent.fullText.count) chars! ✅")
+                        self.clippyController.setState(.done, message: "Saved \(parsedContent.fullText.count) chars! ✅")
                     } else {
-                        self.floatingDogController.setState(.error, message: "No text found 👀")
+                        self.clippyController.setState(.error, message: "No text found 👀")
                     }
                 case .failure(let error):
                     print("❌ Vision parsing failed: \(error.localizedDescription)")
                     
                     // Check if it's a permission error
                     if case VisionParserError.screenCaptureFailed = error {
-                        self.floatingDogController.setState(.error, message: "Need Screen Recording permission 🔐")
+                        self.clippyController.setState(.error, message: "Need Screen Recording permission 🔐")
                         // Open System Settings
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                             if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture") {
@@ -234,7 +234,7 @@ struct ContentView: View {
                             }
                         }
                     } else {
-                        self.floatingDogController.setState(.error, message: "Vision failed: \(error.localizedDescription)")
+                        self.clippyController.setState(.error, message: "Vision failed: \(error.localizedDescription)")
                     }
                 }
                 
@@ -265,7 +265,7 @@ struct ContentView: View {
         if activeInputMode == .textCapture {
             // Second press: Stop capturing and start thinking
             if textCaptureService.isCapturing {
-                floatingDogController.setState(.thinking)
+                clippyController.setState(.thinking)
                 thinkingStartTime = Date() // Record when thinking started
                 textCaptureService.stopCapturing()
                 // Processing happens in onComplete callback
@@ -278,11 +278,11 @@ struct ContentView: View {
             resetInputState()
             activeInputMode = .textCapture
             
-            floatingDogController.setState(.idle)
+            clippyController.setState(.idle)
             textCaptureService.startCapturing(
                 onTypingDetected: {
                     // Switch to writing state when user starts typing
-                    self.floatingDogController.setState(.writing)
+                    self.clippyController.setState(.writing)
                 },
                 onComplete: { capturedText in
                     self.lastCapturedText = capturedText
@@ -300,7 +300,7 @@ struct ContentView: View {
         if thinkingStartTime == nil {
             thinkingStartTime = Date()
         }
-        floatingDogController.setState(.thinking)
+        clippyController.setState(.thinking)
         
         Task {
             // Get recent clipboard items for context
@@ -348,16 +348,16 @@ struct ContentView: View {
             
             // Check if there was an error
             if let errorMessage = errorMessage {
-                self.floatingDogController.setState(.error, message: "❌ \(errorMessage)")
+                self.clippyController.setState(.error, message: "❌ \(errorMessage)")
                 // Auto-hide after showing error
                 DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-                    self.floatingDogController.hide()
+                    self.clippyController.hide()
                 }
                 return
             }
             
             // Transition to done state
-            self.floatingDogController.setState(.done)
+            self.clippyController.setState(.done)
             
             if let imageIndex = imageIndex, imageIndex > 0, imageIndex <= recentItems.count {
                 let item = recentItems[imageIndex - 1]
@@ -371,28 +371,28 @@ struct ContentView: View {
                     
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                         self.simulatePaste()
-                        self.floatingDogController.setState(.done, message: "Image pasted! 🖼️")
+                        self.clippyController.setState(.done, message: "Image pasted! 🖼️")
                     }
                 } else {
-                    self.floatingDogController.setState(.idle, message: "That's not an image 🤔")
+                    self.clippyController.setState(.idle, message: "That's not an image 🤔")
                 }
             } else if let answer = answer?.trimmingCharacters(in: .whitespacesAndNewlines), !answer.isEmpty {
                 // Handle based on input mode
                 if self.activeInputMode == .textCapture {
                     // For text capture: replace captured text with answer
                     self.textCaptureService.replaceCapturedTextWithAnswer(answer)
-                    self.floatingDogController.setState(.done, message: "Answer ready! 🎉")
+                    self.clippyController.setState(.done, message: "Answer ready! 🎉")
                 } else if self.activeInputMode == .voiceCapture {
                     // For voice: insert answer at current cursor position
                     self.textCaptureService.insertTextAtCursor(answer)
-                    self.floatingDogController.setState(.done, message: "Answer ready! 🎉")
+                    self.clippyController.setState(.done, message: "Answer ready! 🎉")
                 } else {
                     // Fallback: insert at cursor
                     self.textCaptureService.insertTextAtCursor(answer)
-                    self.floatingDogController.setState(.done, message: "Answer ready! 🎉")
+                    self.clippyController.setState(.done, message: "Answer ready! 🎉")
                 }
             } else {
-                self.floatingDogController.setState(.idle, message: "Question not relevant to clipboard 📋")
+                self.clippyController.setState(.idle, message: "Question not relevant to clipboard 📋")
             }
             
             // Reset input mode after processing
@@ -412,7 +412,7 @@ struct ContentView: View {
             // Second press: Stop Recording & Process
             if isRecordingVoice {
                 isRecordingVoice = false
-                floatingDogController.setState(.thinking) // Dog looks like it's thinking
+                clippyController.setState(.thinking) // Dog looks like it's thinking
                 
                 guard let url = audioRecorder.stopRecording() else { 
                     resetInputState()
@@ -420,7 +420,7 @@ struct ContentView: View {
                 }
                 
                 guard let service = elevenLabsService else {
-                    floatingDogController.setState(.error, message: "ElevenLabs API Key missing! 🔑")
+                    clippyController.setState(.error, message: "ElevenLabs API Key missing! 🔑")
                     // Don't reset state immediately so user sees message
                     return
                 }
@@ -435,14 +435,14 @@ struct ContentView: View {
                             if !text.isEmpty {
                                 self.processCapturedText(text)
                             } else {
-                                self.floatingDogController.setState(.idle, message: "I didn't catch that 👂")
+                                self.clippyController.setState(.idle, message: "I didn't catch that 👂")
                                 self.activeInputMode = .none
                             }
                         }
                     } catch {
                         await MainActor.run {
                             print("Voice Error: \(error.localizedDescription)")
-                            self.floatingDogController.setState(.error, message: "Couldn't hear you 🙉")
+                            self.clippyController.setState(.error, message: "Couldn't hear you 🙉")
                             self.activeInputMode = .none
                         }
                     }
@@ -457,7 +457,7 @@ struct ContentView: View {
             
             // Check if service is available before starting
             if elevenLabsService == nil {
-                floatingDogController.setState(.idle, message: "Set ElevenLabs API Key in Settings ⚙️")
+                clippyController.setState(.idle, message: "Set ElevenLabs API Key in Settings ⚙️")
                 // Reset mode after delay
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                     if self.activeInputMode == .voiceCapture {
@@ -469,7 +469,7 @@ struct ContentView: View {
             
             isRecordingVoice = true
             _ = audioRecorder.startRecording()
-            floatingDogController.setState(.idle, message: "Listening... 🎙️")
+            clippyController.setState(.idle, message: "Listening... 🎙️")
         }
     }
     

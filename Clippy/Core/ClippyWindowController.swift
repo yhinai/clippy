@@ -2,7 +2,7 @@ import SwiftUI
 import AppKit
 import ApplicationServices
 
-class FloatingDogWindowController: ObservableObject {
+class ClippyWindowController: ObservableObject {
     private var window: NSWindow?
     private var hostingController: NSHostingController<AnyView>?
     private var animationResetID = UUID()
@@ -18,11 +18,11 @@ class FloatingDogWindowController: ObservableObject {
             let displayMessage = message ?? state.defaultMessage
             let gifName = state.gifFileName
             
-            print("📎 [FloatingDogWindowController] Setting state to \(state) with GIF: \(gifName)")
+            print("📎 [ClippyWindowController] Setting state to \(state) with GIF: \(gifName)")
             
             // Create window if needed
             if self.window == nil {
-                print("📎 [FloatingDogWindowController] Creating new window")
+                print("📎 [ClippyWindowController] Creating new window")
                 self.createWindow()
             }
             
@@ -74,7 +74,7 @@ class FloatingDogWindowController: ObservableObject {
             self.window?.orderFrontRegardless()
             self.isVisible = true
             
-            print("📎 [FloatingDogWindowController] Window positioned and visible")
+            print("📎 [ClippyWindowController] Window positioned and visible")
             
             // Start monitoring for ESC key when window is shown
             self.startEscapeKeyMonitoring()
@@ -142,18 +142,18 @@ class FloatingDogWindowController: ObservableObject {
         // Window is ready but not shown yet
         window.alphaValue = 1.0
         
-        print("📎 [FloatingDogWindowController] Window created and ready")
+        print("📎 [ClippyWindowController] Window created and ready")
     }
     
     // MARK: - Public Methods
     
-    /// Toggle whether the dog follows the active text input
+    /// Toggle whether the clippy follows the active text input
     func setFollowTextInput(_ enabled: Bool) {
         followTextInput = enabled
-        print("🐕 [FloatingDogWindowController] Text input following: \(enabled ? "enabled" : "disabled")")
+        print("🐕 [ClippyWindowController] Text input following: \(enabled ? "enabled" : "disabled")")
     }
     
-    /// Manually reposition the dog near the current text input (if following is enabled)
+    /// Manually reposition the clippy near the current text input (if following is enabled)
     func repositionNearTextInput() {
         guard followTextInput else { return }
         positionNearActiveTextInput()
@@ -161,7 +161,7 @@ class FloatingDogWindowController: ObservableObject {
     
     // MARK: - Text Input Positioning
     
-    /// Position the dog window near the currently active text input element
+    /// Position the clippy window near the currently active text input element
     private func positionNearActiveTextInput() {
         guard let window = window else { return }
         
@@ -176,12 +176,12 @@ class FloatingDogWindowController: ObservableObject {
     /// Get the frame (position and size) of the currently focused text input element
     private func getActiveTextInputFrame() -> NSRect? {
         guard AXIsProcessTrusted() else {
-            print("⚠️ [FloatingDogWindowController] Accessibility permission not granted")
+            print("⚠️ [ClippyWindowController] Accessibility permission not granted")
             return nil
         }
         
         guard let frontmostApp = NSWorkspace.shared.frontmostApplication else {
-            print("⚠️ [FloatingDogWindowController] No frontmost application")
+            print("⚠️ [ClippyWindowController] No frontmost application")
             return nil
         }
         
@@ -190,7 +190,7 @@ class FloatingDogWindowController: ObservableObject {
         let result = AXUIElementCopyAttributeValue(appElement, kAXFocusedUIElementAttribute as CFString, &focusedElementRef)
         
         guard result == AXError.success, let focusedElement = focusedElementRef else {
-            print("⚠️ [FloatingDogWindowController] Unable to locate focused UI element")
+            print("⚠️ [ClippyWindowController] Unable to locate focused UI element")
             return nil
         }
         
@@ -198,25 +198,25 @@ class FloatingDogWindowController: ObservableObject {
         
         // Check if the focused element is a text input (text field, text area, etc.)
         if !isTextInputElement(focusedUIElement) {
-            print("ℹ️ [FloatingDogWindowController] Focused element is not a text input")
+            print("ℹ️ [ClippyWindowController] Focused element is not a text input")
             return nil
         }
         
         // Try to get the exact caret position first
         if let caretFrame = getCaretPosition(focusedUIElement) {
-            print("✅ [FloatingDogWindowController] Found caret at: \(caretFrame)")
+            print("✅ [ClippyWindowController] Found caret at: \(caretFrame)")
             return caretFrame
         }
         
         // Fallback to text field bounds if caret position is not available
         guard let position = getElementPosition(focusedUIElement),
               let size = getElementSize(focusedUIElement) else {
-            print("⚠️ [FloatingDogWindowController] Unable to get text input position/size")
+            print("⚠️ [ClippyWindowController] Unable to get text input position/size")
             return nil
         }
         
         let frame = NSRect(x: position.x, y: position.y, width: size.width, height: size.height)
-        print("✅ [FloatingDogWindowController] Found text input at: \(frame) (fallback to field bounds)")
+        print("✅ [ClippyWindowController] Found text input at: \(frame) (fallback to field bounds)")
         return frame
     }
     
@@ -274,7 +274,7 @@ class FloatingDogWindowController: ObservableObject {
         let rangeResult = AXUIElementCopyAttributeValue(element, kAXSelectedTextRangeAttribute as CFString, &selectedRangeRef)
         
         guard rangeResult == AXError.success, let selectedRangeValue = selectedRangeRef else {
-            print("⚠️ [FloatingDogWindowController] Unable to get selected text range")
+            print("⚠️ [ClippyWindowController] Unable to get selected text range")
             return nil
         }
         
@@ -288,7 +288,7 @@ class FloatingDogWindowController: ObservableObject {
         )
         
         guard boundsResult == AXError.success, let caretBoundsValue = caretBoundsRef else {
-            print("⚠️ [FloatingDogWindowController] Unable to get caret bounds")
+            print("⚠️ [ClippyWindowController] Unable to get caret bounds")
             return nil
         }
         
@@ -299,12 +299,12 @@ class FloatingDogWindowController: ObservableObject {
             // Convert CGRect to NSRect and return
             return NSRect(x: caretBounds.origin.x, y: caretBounds.origin.y, width: max(caretBounds.width, 2), height: caretBounds.height)
         } else {
-            print("⚠️ [FloatingDogWindowController] Failed to extract caret bounds from AXValue")
+            print("⚠️ [ClippyWindowController] Failed to extract caret bounds from AXValue")
             return nil
         }
     }
     
-    /// Position the dog window in a fixed location - horizontally centered, just below screen center
+    /// Position the clippy window in a fixed location - horizontally centered, just below screen center
     private func positionWindow(_ window: NSWindow, nearTextInput textInputFrame: NSRect) {
         positionWindowCentered(window)
     }
@@ -314,7 +314,7 @@ class FloatingDogWindowController: ObservableObject {
         positionWindowCentered(window)
     }
     
-    /// Position the dog window in the top-right area of the screen, away from the notch
+    /// Position the clippy window in the top-right area of the screen, away from the notch
     private func positionWindowCentered(_ window: NSWindow) {
         guard let screen = NSScreen.main else { return }
         
@@ -329,12 +329,12 @@ class FloatingDogWindowController: ObservableObject {
         let newOrigin = NSPoint(x: x, y: y)
         window.setFrameOrigin(newOrigin)
         
-        print("🐕 [FloatingDogWindowController] Positioned dog in top-right at: \(newOrigin)")
+        print("🐕 [ClippyWindowController] Positioned clippy in top-right at: \(newOrigin)")
     }
     
     // MARK: - ESC Key Monitoring
     
-    /// Start monitoring for ESC key presses to dismiss the dog
+    /// Start monitoring for ESC key presses to dismiss the clippy
     private func startEscapeKeyMonitoring() {
         // Stop any existing monitor first
         stopEscapeKeyMonitoring()
@@ -342,12 +342,12 @@ class FloatingDogWindowController: ObservableObject {
         escapeKeyMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
             // Check if ESC key was pressed (keyCode 53)
             if event.keyCode == 53 {
-                print("🐕 [FloatingDogWindowController] ESC key pressed - hiding dog")
+                print("🐕 [ClippyWindowController] ESC key pressed - hiding clippy")
                 self?.hide()
             }
         }
         
-        print("🐕 [FloatingDogWindowController] Started ESC key monitoring")
+        print("🐕 [ClippyWindowController] Started ESC key monitoring")
     }
     
     /// Stop monitoring for ESC key presses
@@ -355,10 +355,10 @@ class FloatingDogWindowController: ObservableObject {
         if let monitor = escapeKeyMonitor {
             NSEvent.removeMonitor(monitor)
             escapeKeyMonitor = nil
-            print("🐕 [FloatingDogWindowController] Stopped ESC key monitoring")
+            print("🐕 [ClippyWindowController] Stopped ESC key monitoring")
         }
 
-        // Reset animation when dismissing the dog so it restarts next time it's shown
+        // Reset animation when dismissing the clippy so it restarts next time it's shown
         animationResetID = UUID()
     }
     
