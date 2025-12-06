@@ -142,7 +142,8 @@ struct ContentView: View {
                 modelContext: modelContext,
                 clippy: clippy,
                 geminiService: geminiService,
-                localAIService: localAIService
+                localAIService: localAIService,
+                visionParser: visionParser
             )
             
             startHotkeys()
@@ -326,10 +327,42 @@ struct ContentView: View {
         clippyController.setState(.thinking)
         
         Task {
-            // Get recent clipboard items for context
-            let recentItems = Array(allItems.prefix(10))
-            let clipboardContext = recentItems.map { (content: $0.content, tags: $0.tags) }
+            // 1. Semantic Search for Context
+            var relevantItems: [Item] = []
             
+            // Perform vector search
+            let searchResults = await clippy.search(query: capturedText, limit: 10)
+            let foundVectorIds = Set(searchResults.map { $0.0 })
+            
+            if !foundVectorIds.isEmpty {
+                // Filter allItems for matching IDs
+                // Note: Efficient enough for typical usage; huge DBs might need optimization
+                let itemsWithIDs = allItems.filter { item in
+                    guard let vid = item.vectorId else { return false }
+                    return foundVectorIds.contains(vid)
+                }
+                
+                // Sort by search score (re-order based on searchResults order)
+                relevantItems = searchResults.compactMap { (id, _) in
+                    itemsWithIDs.first(where: { $0.vectorId == id })
+                }
+            }
+            
+            // 2. Fallback / Supplement with Recent Items
+            // If we have few results, add recent items to ensure we have recent context too
+            if relevantItems.count < 5 {
+                let recentItems = Array(allItems.prefix(5))
+                for item in recentItems {
+                    if !relevantItems.contains(where: { $0.timestamp == item.timestamp }) {
+                        relevantItems.append(item)
+                    }
+                }
+            }
+            
+            // 3. Build Context
+            let clipboardContext = relevantItems.map { (content: $0.content, tags: $0.tags) }
+            print("🧠 [ContentView] RAG Context: Using \(relevantItems.count) items (\(searchResults.count) from search)")
+
             let answer: String?
             let imageIndex: Int?
             
@@ -352,12 +385,12 @@ struct ContentView: View {
             await MainActor.run {
                 // Check for errors and get error message
                 let errorMessage = geminiService.lastErrorMessage
-                handleAIResponse(answer: answer, imageIndex: imageIndex, recentItems: recentItems, errorMessage: errorMessage)
+                handleAIResponse(answer: answer, imageIndex: imageIndex, contextItems: relevantItems, errorMessage: errorMessage)
             }
         }
     }
     
-    private func handleAIResponse(answer: String?, imageIndex: Int?, recentItems: [Item], errorMessage: String? = nil) {
+    private func handleAIResponse(answer: String?, imageIndex: Int?, contextItems: [Item], errorMessage: String? = nil) {
         // Calculate how long we've been in thinking state
         let elapsed = Date().timeIntervalSince(thinkingStartTime ?? Date())
         let remainingDelay = max(0, 3.0 - elapsed) // Minimum 3 seconds of thinking
@@ -382,8 +415,8 @@ struct ContentView: View {
             // Transition to done state
             self.clippyController.setState(.done)
             
-            if let imageIndex = imageIndex, imageIndex > 0, imageIndex <= recentItems.count {
-                let item = recentItems[imageIndex - 1]
+            if let imageIndex = imageIndex, imageIndex > 0, imageIndex <= contextItems.count {
+                let item = contextItems[imageIndex - 1]
                 if item.contentType == "image", let imagePath = item.imagePath {
                     ClipboardService.shared.copyImageToClipboard(imagePath: imagePath)
                     
@@ -517,7 +550,8 @@ struct ContentView: View {
             modelContext: modelContext,
             clippy: clippy,
             geminiService: geminiService,
-            localAIService: localAIService
+            localAIService: localAIService,
+            visionParser: visionParser
         )
     }
     

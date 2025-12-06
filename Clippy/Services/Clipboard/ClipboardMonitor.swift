@@ -19,12 +19,14 @@ class ClipboardMonitor: ObservableObject {
     private var clippy: Clippy?
     private var geminiService: GeminiService?
     private var localAIService: LocalAIService?
+    private var visionParser: VisionScreenParser?
     
-    func startMonitoring(modelContext: ModelContext, clippy: Clippy, geminiService: GeminiService? = nil, localAIService: LocalAIService? = nil) {
+    func startMonitoring(modelContext: ModelContext, clippy: Clippy, geminiService: GeminiService? = nil, localAIService: LocalAIService? = nil, visionParser: VisionScreenParser? = nil) {
         self.modelContext = modelContext
         self.clippy = clippy
         self.geminiService = geminiService
         self.localAIService = localAIService
+        self.visionParser = visionParser
         
         // Check accessibility permission (for context features), but do not gate clipboard monitoring on it
         checkAccessibilityPermission()
@@ -319,20 +321,47 @@ class ClipboardMonitor: ObservableObject {
             if let localService = localAIService {
                 print("   🧠 Using Local Vision Model...")
                 let base64Image = imageData.base64EncodedString()
-                if let localDesc = await localService.generateVisionDescription(base64Image: base64Image) {
-                    // Parse Title/Body from strict format "Title: ..."
-                    let lines = localDesc.split(separator: "\n", maxSplits: 1, omittingEmptySubsequences: true)
-                    if let firstLine = lines.first, firstLine.hasPrefix("Title:") {
-                         let titleText = String(firstLine.dropFirst(6)).trimmingCharacters(in: .whitespacesAndNewlines)
-                         title = titleText
-                         if lines.count > 1 {
-                             description = String(lines[1]).trimmingCharacters(in: .whitespacesAndNewlines)
-                         } else {
-                             description = titleText // Fallback if only title exists
-                         }
-                    } else {
-                         description = localDesc
+                
+                // Capture screen context if parser available
+                var screenText: String? = nil
+                if let parser = self.visionParser {
+                    print("   👀 Capturing screen text for context...")
+                    screenText = await withCheckedContinuation { continuation in
+                        parser.extractTextFromScreen { text in
+                            continuation.resume(returning: text)
+                        }
                     }
+                    if let text = screenText {
+                         print("   ✅ Captured \(text.count) chars of screen context")
+                    }
+                }
+                
+                if let localDesc = await localService.generateVisionDescription(base64Image: base64Image, screenText: screenText) {
+                    // Improved Parsing: Find the specific line starting with "Title:"
+                    let lines = localDesc.split(separator: "\n", omittingEmptySubsequences: true)
+                    var parsedTitle: String? = nil
+                    var parsedBody: String = localDesc
+                    
+                    if let titleIndex = lines.firstIndex(where: { $0.trimmingCharacters(in: .whitespaces).hasPrefix("Title:") }) {
+                         let titleLine = lines[titleIndex]
+                         parsedTitle = String(titleLine.dropFirst(6)).trimmingCharacters(in: .whitespacesAndNewlines)
+                         
+                         // Body is everything after the title line
+                         if titleIndex + 1 < lines.count {
+                             parsedBody = lines[(titleIndex + 1)...].joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+                         } else {
+                             parsedBody = ""
+                         }
+                    }
+                    
+                    title = parsedTitle
+                    description = parsedBody
+                    
+                    // Append raw screen text for context/searchability
+                    if let validScreenText = screenText, !validScreenText.isEmpty {
+                        description += "\n\n## Extracted Screen Text\n\(validScreenText)"
+                    }
+
                     print("   ✅ Local Vision parsed - Title: \(title ?? "None")")
                 } else {
                     print("   ⚠️ Local Vision failed, falling back to default")
@@ -370,6 +399,34 @@ class ClipboardMonitor: ObservableObject {
                     let embeddingText = title != nil ? "\(title!)\n\n\(description)" : description
                     await clippy.addDocument(vectorId: vectorId, text: embeddingText)
                     print("   ✅ Image embedding stored for search")
+                }
+                
+                // 5. Generate tags asynchronously
+                Task {
+                    var tags: [String] = []
+                    
+                    if let localService = localAIService {
+                        print("   🧠 Using Local AI for tagging image...")
+                        tags = await localService.generateTags(
+                            content: description,
+                            appName: currentAppName.isEmpty ? nil : currentAppName,
+                            context: nil // Don't need extra accessibility context since we have screen context in description
+                        )
+                    } else if let gemini = geminiService {
+                        print("   ✨ Using Gemini for tagging image...")
+                        tags = await gemini.generateTags(
+                            content: description,
+                            appName: currentAppName.isEmpty ? nil : currentAppName,
+                            context: nil
+                        )
+                    }
+                    
+                    // Update item with tags
+                    if !tags.isEmpty {
+                        newItem.tags = tags
+                        try? modelContext.save()
+                        print("   🏷️  Image tags stored: \(tags)")
+                    }
                 }
             } catch {
                 print("   ❌ Failed to save image item: \(error)")

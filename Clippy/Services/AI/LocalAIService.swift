@@ -68,13 +68,21 @@ class LocalAIService: ObservableObject {
     // MARK: - Vision (LFM2-VL-3B)
     
     /// Generate a description for an image using LFM2-VL-3B
-    func generateVisionDescription(base64Image: String) async -> String? {
+    /// Generate a description for an image using LFM2-VL-3B
+    func generateVisionDescription(base64Image: String, screenText: String? = nil) async -> String? {
         print("👁️ [LocalAIService] Generating vision description...")
         isProcessing = true
         defer { isProcessing = false }
         
-        let prompt = """
+        var prompt = """
         Analyze this screen content in high detail for future reference.
+        """
+        
+        if let text = screenText, !text.isEmpty {
+            prompt += "\n\nCONTEXT FROM SCREEN TEXT (Use this to verify details/code/filenames):\n\(text.prefix(2000))\n"
+        }
+        
+        prompt += """
         
         STRICT OUTPUT FORMAT:
         Title: [Action/Topic] - [Key Subject]
@@ -95,7 +103,8 @@ class LocalAIService: ObservableObject {
         - [User's likely goal]
 
         CONSTRAINTS:
-        - First line MUST be Title.
+        - OUTPUT MUST START DIRECTLY WITH "Title:".
+        - DO NOT WRITE ANY PREAMBLE OR CONVERSATIONAL TEXT (e.g., "Here is the analysis...").
         - Files/Context: Max 5 items. ABSOLUTELY NO REPETITION.
         - Code/Terminal/Intent: Use bullet points.
         - STOP generating if you start repeating.
@@ -133,7 +142,20 @@ class LocalAIService: ObservableObject {
         defer { isProcessing = false }
         
         let contextText = buildContextString(clipboardContext)
-        let prompt = "Context:\n\(contextText)\n\nQuestion: \(question)\n\nInstructions: Answer the question DIRECTLY and CONCISELY. Do NOT use phrases like 'Based on the context', 'The answer is', or 'Here is the info'. Just output the answer. If the answer is a name, output ONLY the name. If it's a key, output ONLY the key.\n\nAnswer:"
+        let prompt = """
+        Context:
+        \(contextText)
+        
+        Question: \(question)
+        
+        Instructions:
+        Answer the question accurately based on the Context.
+        - If the user asks for a list (e.g., "all API keys"), list them clearly (e.g., Name=Value).
+        - If the answer is found in the context, provide it exactly as it appears.
+        - If the answer is NOT in the context, say "I couldn't find that information in your clipboard history."
+        
+        Answer:
+        """
         
         let requestBody: [String: Any] = [
             "model": ragModel,
@@ -220,10 +242,47 @@ class LocalAIService: ObservableObject {
     /// Compatibility method for existing code (Tagging) - uses RAG model for now
     func generateTags(content: String, appName: String?, context: String?) async -> [String] {
         // Simple implementation using RAG model for tagging
-        let prompt = "Generate 3-5 keywords/tags for this text: \"\(content.prefix(200))\""
+        let prompt = """
+        Analyze this text and generate 3-5 concise keywords/tags.
+        Rules:
+        1. Return ONLY a comma-separated list (e.g. "Tag1, Tag2, Tag3").
+        2. Do NOT use numbered lists.
+        3. Do NOT write full sentences or introductions like "Here are the tags".
+        
+        Text: "\(content.prefix(500))"
+        """
+        
         guard let response = await generateAnswer(question: prompt, clipboardContext: [], appName: appName) else {
             return []
         }
-        return response.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) }
+        
+        // Robust cleaning and parsing
+        var cleanResponse = response
+        
+        // Remove common conversational prefixes
+        let prefixesToRemove = ["Here are", "The tags are", "Keywords:", "Tags:"]
+        for prefix in prefixesToRemove {
+            if let range = cleanResponse.range(of: prefix, options: .caseInsensitive) {
+                cleanResponse.removeSubrange(cleanResponse.startIndex..<range.upperBound)
+            }
+        }
+        
+        // Split by newlines or commas
+        let separators = CharacterSet(charactersIn: ",\n")
+        let rawTags = cleanResponse.components(separatedBy: separators)
+        
+        let tags = rawTags.compactMap { rawTag -> String? in
+            // Clean up each tag (remove "1.", "- ", etc.)
+            let trimmed = rawTag.trimmingCharacters(in: .whitespacesAndNewlines)
+            let cleaned = trimmed
+                .replacingOccurrences(of: "^[0-9]+\\.", with: "", options: .regularExpression) // Remove "1."
+                .replacingOccurrences(of: "^- ", with: "", options: .regularExpression)        // Remove "- "
+                .replacingOccurrences(of: "^• ", with: "", options: .regularExpression)        // Remove "• "
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            
+            return cleaned.isEmpty ? nil : cleaned
+        }
+        
+        return Array(Set(tags)).prefix(5).sorted() // Dedupe and limit
     }
 }

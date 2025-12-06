@@ -233,7 +233,7 @@ class VisionScreenParser: ObservableObject {
         let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
         
         do {
-            try handler.perform([segmentationRequest, textRequest])
+            try handler.perform([segmentationRequest])
         } catch {
             completion(.failure(error))
         }
