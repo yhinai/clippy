@@ -45,7 +45,7 @@ struct LocalAIResponse: Codable {
 }
 
 @MainActor
-class LocalAIService: ObservableObject {
+class LocalAIService: ObservableObject, AIServiceProtocol {
     @Published var isProcessing = false
     @Published var lastError: String?
     
@@ -58,14 +58,11 @@ class LocalAIService: ObservableObject {
     private let visionModel = "mlx-community/LFM2-VL-3B-4bit"
     private let ragModel = "LiquidAI/LFM2-1.2B-RAG"
     private let extractModel = "LiquidAI/LFM2-1.2B-Extract"
-    
 
-    
     init() {}
-    
+
     // MARK: - Vision (LFM2-VL-3B)
-    
-    /// Generate a description for an image using LFM2-VL-3B
+
     /// Generate a description for an image using LFM2-VL-3B
     func generateVisionDescription(base64Image: String, screenText: String? = nil) async -> String? {
         print("👁️ [LocalAIService] Generating vision description...")
@@ -127,11 +124,11 @@ class LocalAIService: ObservableObject {
         return await makeRequest(endpoint: visionEndpoint, body: requestBody, extractField: "content")
     }
     
-    // MARK: - RAG (LFM2-1.2B-RAG)
-    
-    // MARK: - Types
-    
-    typealias RAGContextItem = (content: String, tags: [String], type: String, timestamp: Date, title: String?)
+    /// Protocol conformance: Analyze image data and return description
+    func analyzeImage(imageData: Data) async -> String? {
+        let base64Image = imageData.base64EncodedString()
+        return await generateVisionDescription(base64Image: base64Image)
+    }
     
     // MARK: - RAG (LFM2-1.2B-RAG)
     

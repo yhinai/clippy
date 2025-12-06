@@ -369,8 +369,8 @@ struct ContentView: View {
             }
             
             // 3. Build Context
-            let clipboardContext = relevantItems.map { item in
-                return (
+            let clipboardContext: [RAGContextItem] = relevantItems.map { item in
+                RAGContextItem(
                     content: item.content,
                     tags: item.tags,
                     type: item.contentType,

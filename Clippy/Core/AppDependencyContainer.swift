@@ -16,6 +16,21 @@ class AppDependencyContainer: ObservableObject {
     let geminiService: GeminiService
     let audioRecorder: AudioRecorder
     
+    /// Currently selected AI service (persisted in UserDefaults)
+    @Published var selectedAIServiceType: AIServiceType = .local {
+        didSet {
+            UserDefaults.standard.set(selectedAIServiceType.rawValue, forKey: "SelectedAIService")
+        }
+    }
+    
+    /// Unified AI service access - returns the currently selected service
+    var aiService: any AIServiceProtocol {
+        switch selectedAIServiceType {
+        case .local: return localAIService
+        case .gemini: return geminiService
+        }
+    }
+    
     // Data Layer
     var repository: ClipboardRepository?
     

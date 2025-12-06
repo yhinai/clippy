@@ -17,7 +17,7 @@ struct GeminiAPIResponse: Codable {
 }
 
 @MainActor
-class GeminiService: ObservableObject {
+class GeminiService: ObservableObject, AIServiceProtocol {
     @Published var isProcessing = false
     @Published var lastError: String?
     @Published var lastErrorMessage: String? // User-friendly error message
@@ -89,6 +89,17 @@ class GeminiService: ObservableObject {
             appName: appName
         )
         return answer
+    }
+    
+    /// Protocol conformance: Generate answer from RAGContextItem array
+    func generateAnswer(
+        question: String,
+        clipboardContext: [RAGContextItem],
+        appName: String?
+    ) async -> String? {
+        // Convert RAGContextItem to legacy tuple format
+        let legacyContext = clipboardContext.map { ($0.content, $0.tags) }
+        return await generateAnswer(question: question, clipboardContext: legacyContext, appName: appName)
     }
     
     /// Generate semantic tags for clipboard content to improve retrieval
