@@ -11,163 +11,120 @@ struct ClipboardDetailView: View {
     @State private var selectedTag: String? = nil
     
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                // Header / Title
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(item.title ?? item.content)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .lineLimit(3)
-                        .textSelection(.enabled)
-                    
-                    HStack {
-                        if let appName = item.appName {
-                            Label(appName, systemImage: "app")
+        ZStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    // Header
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text(item.title ?? "Untitled")
+                            .font(.system(.title2, design: .rounded, weight: .bold))
+                            .foregroundColor(.primary)
+                            .lineLimit(2)
+                            .textSelection(.enabled)
+                        
+                        HStack(spacing: 6) {
+                            if let appName = item.appName {
+                                Image(systemName: "app.fill")
+                                Text(appName)
+                            }
+                            Text("·")
+                            Text(item.timestamp, format: .dateTime.day().month().hour().minute())
                         }
-                        Text("•")
-                        Text(item.timestamp, format: .dateTime.day().month().hour().minute())
-                    }
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                }
-                
-                Divider()
-                
-                // Main Content Display
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("CONTENT")
-                        .font(.caption)
-                        .fontWeight(.bold)
+                        .font(.system(.caption, weight: .medium))
                         .foregroundColor(.secondary)
+                    }
+                    .padding(.top, 20)
+                    .padding(.horizontal, 20)
                     
+                    // Main Content
                     if item.contentType == "image", let imagePath = item.imagePath {
                         AsyncImageLoader(imagePath: imagePath)
                             .cornerRadius(12)
-                            .frame(maxHeight: 500)
-                            .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
-                        
-                        // Show description below image
-                        Text(item.content)
-                            .font(.body)
-                            .padding(16)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(.regularMaterial)
-                            .cornerRadius(12)
-                            .textSelection(.enabled)
+                            .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 5)
+                            .padding(.horizontal, 20)
                     } else {
+                        // Read-only TextEditor with transparent background
                         Text(item.content)
                             .font(.system(.body, design: .monospaced))
-                            .padding(16)
+                            .foregroundColor(.primary.opacity(0.9))
+                            .padding(20)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(.regularMaterial)
-                            .cornerRadius(12)
+                            .background(Color.clear) // Transparent to let blur show through
                             .textSelection(.enabled)
                     }
                     
-                    // Prominent Copy Button
-                    Button(action: copyContentWithFeedback) {
-                        HStack {
-                            Image(systemName: showCopiedFeedback ? "checkmark.circle.fill" : "doc.on.clipboard.fill")
-                            Text(showCopiedFeedback ? "Copied!" : "Copy to Clipboard")
-                                .fontWeight(.medium)
+                    // Tags (Flow Layout)
+                    if !item.tags.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("TAGS")
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal, 20)
+                            
+                            FlowLayout(spacing: 8) {
+                                ForEach(item.tags, id: \.self) { tag in
+                                    Text(tag)
+                                        .font(.system(size: 11, weight: .medium))
+                                        .foregroundColor(.secondary)
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 4)
+                                        .background(.ultraThinMaterial)
+                                        .clipShape(Capsule())
+                                }
+                            }
+                            .padding(.horizontal, 20)
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(showCopiedFeedback ? Color.green : Color.accentColor)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                    }
-                    .buttonStyle(.plain)
-                    .animation(.easeInOut(duration: 0.2), value: showCopiedFeedback)
-                }
-                
-                // Tags Section
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        Text("TAGS")
-                            .font(.caption)
-                            .fontWeight(.bold)
-                            .foregroundColor(.secondary)
-                        
-                        Spacer()
-                        
-                        Button(action: { isEditingTags.toggle() }) {
-                            Label(isEditingTags ? "Done" : "Edit", systemImage: isEditingTags ? "checkmark.circle" : "pencil.circle")
-                                .font(.caption)
-                        }
-                        .buttonStyle(.borderless)
                     }
                     
-                    FlowLayout(spacing: 8) {
-                        ForEach(item.tags, id: \.self) { tag in
-                            TagChipView(
-                                tag: tag,
-                                isSelected: selectedTag == tag,
-                                isEditing: isEditingTags,
-                                onSelect: { selectedTag = (selectedTag == tag) ? nil : tag },
-                                onRemove: { removeTag(tag) }
-                            )
-                        }
-                        
-                        if isEditingTags {
-                            HStack {
-                                TextField("New tag", text: $newTagInput)
-                                    .textFieldStyle(.plain)
-                                    .frame(width: 80)
-                                    .onSubmit { addTag() }
-                                
-                                Button(action: addTag) {
-                                    Image(systemName: "plus.circle.fill")
-                                        .foregroundColor(.blue)
-                                }
-                                .buttonStyle(.plain)
-                                .disabled(newTagInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                            }
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
-                            .background(Color.gray.opacity(0.1))
-                            .cornerRadius(16)
-                        }
+                    Spacer(minLength: 80) // Space for floating bar
+                }
+            }
+            // Floating Action Bar (Bottom Right)
+            .overlay(alignment: .bottomTrailing) {
+                HStack(spacing: 16) {
+                    Button(action: {
+                        item.isFavorite.toggle()
+                    }) {
+                        Image(systemName: item.isFavorite ? "heart.fill" : "heart")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(item.isFavorite ? .red : .primary)
                     }
+                    .buttonStyle(.plain)
+                    
+                    Divider()
+                        .frame(height: 16)
+                    
+                    Button(action: copyContentWithFeedback) {
+                        Image(systemName: showCopiedFeedback ? "checkmark" : "doc.on.doc")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(showCopiedFeedback ? .green : .primary)
+                    }
+                    .buttonStyle(.plain)
+                    
+                    Divider()
+                        .frame(height: 16)
+                    
+                    Button(role: .destructive, action: deleteItem) {
+                        Image(systemName: "trash")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.red.opacity(0.8))
+                    }
+                    .buttonStyle(.plain)
                 }
-                
-                Spacer()
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                .background(.ultraThinMaterial)
+                .clipShape(Capsule())
+                .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
+                .overlay(
+                    Capsule()
+                        .stroke(.white.opacity(0.2), lineWidth: 1)
+                )
+                .padding(24)
             }
-            .padding(20)
         }
-        .background(.ultraThinMaterial)
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button(action: {
-                    item.isFavorite.toggle()
-                }) {
-                    Label("Favorite", systemImage: item.isFavorite ? "heart.fill" : "heart")
-                        .foregroundColor(item.isFavorite ? .red : .primary)
-                }
-            }
-            
-            ToolbarItem(placement: .primaryAction) {
-                Button(action: copyContent) {
-                    Label("Copy", systemImage: "doc.on.clipboard")
-                }
-            }
-            
-            ToolbarItem(placement: .primaryAction) {
-                Button(role: .destructive, action: deleteItem) {
-                    Label("Delete", systemImage: "trash")
-                }
-            }
-        }
-        .focusable()
-        .onKeyPress(.escape) {
-            if let tag = selectedTag {
-                removeTag(tag)
-                selectedTag = nil
-                return .handled
-            }
-            return .ignored
-        }
+        .background(.ultraThinMaterial) // Glass background for entire detail view
+        .ignoresSafeArea()
     }
     
     private func copyContent() {

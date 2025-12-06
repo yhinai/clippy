@@ -20,8 +20,10 @@ struct ClipboardListView: View {
             if searchText.isEmpty {
                 // Normal List View
                 ForEach(filteredItems) { item in
-                    ClipboardItemRow(item: item)
+                    ClipboardItemRow(item: item, isSelected: selectedItems.contains(item.persistentModelID))
                         .tag(item)
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
                         .contextMenu {
                             Button {
                                 copyToClipboard(item)
@@ -73,7 +75,10 @@ struct ClipboardListView: View {
                 } else {
 
                     ForEach(searchResults) { item in
-                        ClipboardItemRow(item: item)
+                        ClipboardItemRow(item: item, isSelected: selectedItems.contains(item.persistentModelID))
+                            .tag(item)
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
                             .tag(item)
                             .contextMenu {
                                 Button {
@@ -114,7 +119,9 @@ struct ClipboardListView: View {
                 }
             }
         }
-        .listStyle(.inset)
+        .scrollContentBackground(.hidden)
+        .background(Color.clear)
+        .listStyle(.plain)
         .navigationTitle(category?.rawValue ?? "Clipboard")
         .onChange(of: searchText) { _, newValue in
             // Cancel previous task
@@ -211,118 +218,127 @@ struct ClipboardListView: View {
 
 // MARK: - Clipboard Item Row
 
+// MARK: - Clipboard Item Row
+
 struct ClipboardItemRow: View {
     let item: Item
+    let isSelected: Bool
+    @State private var actions: [ClipboardAction] = []
     
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            // Icon / Thumbnail
+        HStack(alignment: .top, spacing: 14) {
+            // Gradient Icon
             ZStack {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.gray.opacity(0.1))
-                    .frame(width: 40, height: 40)
+                Circle()
+                    .fill(iconGradient)
+                    .frame(width: 38, height: 38)
+                    .shadow(color: iconColor.opacity(0.3), radius: 4, x: 0, y: 2)
                 
-                if item.contentType == "image" {
-                    Image(systemName: "photo")
-                        .foregroundColor(.blue)
-                } else if item.contentType == "code" {
-                    Image(systemName: "chevron.left.forwardslash.chevron.right")
-                        .foregroundColor(.purple)
-                } else {
-                    Image(systemName: "doc.text")
-                        .foregroundColor(.secondary)
+                Image(systemName: iconName)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.white)
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
+                // Title
+                Text(item.title ?? item.content)
+                    .font(.system(.body, design: .rounded).weight(.medium))
+                    .foregroundColor(.primary)
+                    .lineLimit(1)
+                
+                // Metadata
+                HStack(spacing: 6) {
+                    Text(timeAgo(from: item.timestamp))
+                    
+                    if let appName = item.appName {
+                        Text("·")
+                        Text(appName)
+                    }
+                }
+                .font(.system(size: 11))
+                .foregroundColor(.secondary)
+                
+                // Tags (minimal)
+                if !item.tags.isEmpty {
+                    HStack(spacing: 4) {
+                        ForEach(item.tags.prefix(2), id: \.self) { tag in
+                            Text(tag)
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 3)
+                                .background(Material.ultraThin)
+                                .clipShape(Capsule())
+                        }
+                        if item.tags.count > 2 {
+                            Text("+\(item.tags.count - 2)")
+                                .font(.system(size: 10))
+                                .foregroundColor(.secondary.opacity(0.6))
+                        }
+                    }
+                    .padding(.top, 2)
                 }
             }
             
-
-            VStack(alignment: .leading, spacing: 4) {
-                // Main Content Preview
-                Text(item.title ?? item.content)
-                    .font(item.title != nil ? .system(.body, design: .rounded).weight(.medium) : .system(.body))
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                
-                HStack(spacing: 6) {
-                    // Time
-                    Text(timeAgo(from: item.timestamp))
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                    
-                    Text("•")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                    
-                    // App Name
-                    if let appName = item.appName {
-                        Text("Copied from \(appName)")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                    }
-                }
-                
-                // Action Buttons (Dynamic)
-                if !actions.isEmpty {
-                    HStack(spacing: 8) {
-                        ForEach(actions, id: \.self) { action in
-                            Button(action: { action.perform() }) {
-                                HStack(spacing: 4) {
-                                    Image(systemName: action.iconName)
-                                    Text(action.label)
-                                }
-                                .font(.caption2)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                            }
-                            .buttonStyle(.bordered)
-                            .tint(.blue)
-                        }
-                    }
-                    .padding(.top, 2)
-                }
-                
-                // Tags
-                if !item.tags.isEmpty {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 4) {
-                            ForEach(item.tags.prefix(3), id: \.self) { tag in
-                                Text(tag)
-                                    .font(.system(size: 10, weight: .medium))
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 2)
-                                    .background(Color.secondary.opacity(0.1))
-                                    .cornerRadius(4)
-                                    .foregroundColor(.secondary)
-                            }
-                            if item.tags.count > 3 {
-                                Text("+\(item.tags.count - 3)")
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                    }
-                    .padding(.top, 2)
-                }
+            Spacer()
+            
+            // Favorite indicator
+            if item.isFavorite {
+                Image(systemName: "heart.fill")
+                    .font(.system(size: 12))
+                    .foregroundColor(.red.opacity(0.8))
+                    .padding(4)
             }
         }
-        .padding(.vertical, 8)
+        .padding(12)
+        .background(Color(nsColor: .controlBackgroundColor).opacity(0.5))
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(isSelected ? Color.accentColor : Color.clear, lineWidth: 2)
+        )
+        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
         .onAppear {
-            // Lazy detection
             if actions.isEmpty && item.contentType == "text" {
-                DispatchQueue.global(qos: .userInitiated).async {
+                DispatchQueue.global(qos: .background).async {
                     let detected = ActionDetector.shared.detectActions(in: item.content)
-                    DispatchQueue.main.async {
-                        self.actions = detected
-                    }
+                    DispatchQueue.main.async { actions = detected }
                 }
             }
         }
     }
     
-    @State private var actions: [ClipboardAction] = []
+    private var iconName: String {
+        switch item.contentType {
+        case "image": return "photo"
+        case "code": return "chevron.left.forwardslash.chevron.right"
+        default: return "doc.text"
+        }
+    }
+    
+    private var iconColor: Color {
+        switch item.contentType {
+        case "image": return .blue
+        case "code": return .purple
+        default: return .orange
+        }
+    }
+    
+    private var iconGradient: LinearGradient {
+        switch item.contentType {
+        case "image":
+            return LinearGradient(colors: [.blue, .cyan], startPoint: .topLeading, endPoint: .bottomTrailing)
+        case "code":
+            return LinearGradient(colors: [.purple, .indigo], startPoint: .topLeading, endPoint: .bottomTrailing)
+        default:
+            return LinearGradient(colors: [.orange, .yellow], startPoint: .topLeading, endPoint: .bottomTrailing)
+        }
+    }
     
     private func timeAgo(from date: Date) -> String {
         let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .short
+        formatter.unitsStyle = .abbreviated
         return formatter.localizedString(for: date, relativeTo: Date())
     }
 }
+

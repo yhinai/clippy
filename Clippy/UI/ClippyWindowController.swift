@@ -27,36 +27,48 @@ class ClippyWindowController: ObservableObject {
                 self.createWindow()
             }
             
-                // Update the view content with new state
-                self.hostingController?.rootView = AnyView(
-                    ZStack(alignment: .topTrailing) {
-                        ClippyGifPlayer(gifName: gifName)
-                            .id(gifName) // FORCE VIEW REFRESH
-                            .frame(width: 124, height: 93) // Standard Clippy size
-                        
-                        // Speech bubble with optional loading spinner
-                        if !displayMessage.isEmpty || state == .thinking {
-                            HStack(spacing: 6) {
-                                // Show spinner during thinking state
-                                if state == .thinking {
-                                    ProgressView()
-                                        .scaleEffect(0.6)
-                                        .frame(width: 12, height: 12)
-                                }
-                                
-                                if !displayMessage.isEmpty {
-                                    Text(displayMessage)
-                                }
+            // Update the view content with new state - GLASS HUD DESIGN
+            self.hostingController?.rootView = AnyView(
+                HStack(spacing: 12) {
+                    // Clippy GIF
+                    ClippyGifPlayer(gifName: gifName)
+                        .id(gifName)
+                        .frame(width: 80, height: 60)
+                    
+                    // Message bubble (if any)
+                    if !displayMessage.isEmpty || state == .thinking {
+                        HStack(spacing: 8) {
+                            if state == .thinking {
+                                ProgressView()
+                                    .scaleEffect(0.7)
+                                    .tint(.primary)
                             }
-                            .padding(8)
-                            .background(state == .error ? Color.red.opacity(0.9) : Color.yellow.opacity(0.9))
-                            .cornerRadius(8)
-                            .foregroundColor(.black)
-                            .font(.caption)
-                            .offset(x: -100, y: -50) // Offset to left of Clippy
+                            
+                            if !displayMessage.isEmpty {
+                                Text(displayMessage)
+                                    .font(.system(.caption, design: .rounded, weight: .semibold))
+                                    .foregroundColor(state == .error ? .red : .primary)
+                            }
                         }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
+                        .background(.ultraThinMaterial)
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .stroke(.white.opacity(0.2), lineWidth: 1)
+                        )
                     }
+                }
+                .padding(12)
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .shadow(color: .black.opacity(0.15), radius: 20, x: 0, y: 10)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .stroke(.white.opacity(0.3), lineWidth: 1)
                 )
+            )
             
             // Position near text input if enabled (do this BEFORE showing)
             // Only reposition if window is not already visible to allow user to drag it

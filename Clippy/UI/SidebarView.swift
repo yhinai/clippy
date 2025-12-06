@@ -32,101 +32,90 @@ struct SidebarView: View {
                     ForEach(NavigationCategory.allCases) { category in
                         NavigationLink(value: category) {
                             Label(category.rawValue, systemImage: category.iconName)
-                                .padding(.vertical, 4)
+                                .font(.system(size: 13, weight: .medium))
                         }
                     }
                 }
             }
-            .listStyle(SidebarListStyle())
+            .listStyle(.sidebar)
             
-            Divider()
-            
-            VStack(spacing: 16) {
-                // Keyboard Shortcuts Section (Collapsible)
-                DisclosureGroup("Shortcuts", isExpanded: $showShortcuts) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        KeyboardShortcutHint(keys: "⌥X", description: "Ask Clippy")
-                        KeyboardShortcutHint(keys: "⌥Space", description: "Voice input")
-                        KeyboardShortcutHint(keys: "⌥V", description: "Screen OCR")
-                        KeyboardShortcutHint(keys: "ESC", description: "Dismiss")
-                    }
-                    .padding(.top, 4)
-                }
-                .font(.caption)
-                .foregroundColor(.secondary)
-                
-                Divider()
-                
-                // AI Service Selector
-                VStack(alignment: .leading, spacing: 8) {
+            // Bottom Panel
+            VStack(spacing: 12) {
+                // AI Service
+                VStack(alignment: .leading, spacing: 6) {
                     HStack {
-                        Text("AI SERVICE")
-                            .font(.caption)
-                            .fontWeight(.semibold)
+                        Text("AI")
+                            .font(.system(size: 10, weight: .semibold))
                             .foregroundColor(.secondary)
-                        
                         Spacer()
-                        
                         Button(action: { showSettings = true }) {
-                            Image(systemName: "gearshape.fill")
-                                .font(.caption)
+                            Image(systemName: "gearshape")
+                                .font(.system(size: 11))
                                 .foregroundColor(.secondary)
                         }
                         .buttonStyle(.plain)
-                        .help("Configure API Keys")
                     }
                     
-                    Picker("AI Service", selection: $selectedAIService) {
+                    Picker("", selection: $selectedAIService) {
                         ForEach(AIServiceType.allCases, id: \.self) { service in
                             Text(service.rawValue).tag(service)
                         }
                     }
-                    .pickerStyle(.menu)
+                    .pickerStyle(.segmented)
                     .labelsHidden()
-                    .frame(maxWidth: .infinity)
                 }
                 
-                // Assistant Toggle
+                // Assistant
                 HStack {
-                    Label("Assistant", systemImage: "pawprint.fill")
-                        .font(.subheadline)
-                        .foregroundColor(.primary)
-                    
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+                    Text("Assistant")
+                        .font(.system(size: 12))
                     Spacer()
-                    
                     Toggle("", isOn: $clippyController.followTextInput)
                         .toggleStyle(.switch)
+                        .scaleEffect(0.7)
                         .labelsHidden()
                 }
                 
                 Divider()
+                    .opacity(0.5)
                 
-                // Maintenance Section
-                VStack(spacing: 8) {
+                // Actions
+                HStack(spacing: 8) {
                     Button(action: reindexSearch) {
-                        HStack {
-                            Image(systemName: "arrow.clockwise.circle")
-                            Text("Re-index Search")
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
+                        Image(systemName: "arrow.clockwise")
+                            .font(.system(size: 11))
                     }
                     .buttonStyle(.bordered)
+                    .help("Re-index Search")
                     
                     Button(role: .destructive, action: { showClearConfirmation = true }) {
-                        HStack {
-                            Image(systemName: "trash")
-                            Text("Clear All History")
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
+                        Image(systemName: "trash")
+                            .font(.system(size: 11))
                     }
                     .buttonStyle(.bordered)
                     .tint(.red)
+                    .help("Clear History")
+                    
+                    Spacer()
+                    
+                    // Shortcuts disclosure
+                    DisclosureGroup("", isExpanded: $showShortcuts) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            KeyboardShortcutHint(keys: "⌥X", description: "Ask")
+                            KeyboardShortcutHint(keys: "⌥V", description: "OCR")
+                            KeyboardShortcutHint(keys: "⌥␣", description: "Voice")
+                        }
+                        .padding(.top, 4)
+                    }
+                    .font(.system(size: 10))
+                    .foregroundColor(.secondary)
                 }
             }
-            .padding(20)
-            .background(.ultraThinMaterial)
+            .padding(16)
+            .background(.regularMaterial)
         }
         .confirmationDialog(
             "Clear All Clipboard History?",
