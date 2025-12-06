@@ -157,6 +157,15 @@ struct ClipboardListView: View {
                 }
             }
         }
+        .focusable()
+        .onKeyPress(.escape) {
+            if let item = selectedItem {
+                deleteItem(item)
+                selectedItem = nil
+                return .handled
+            }
+            return .ignored
+        }
     }
     
     // Filter items based on category (when not searching)
