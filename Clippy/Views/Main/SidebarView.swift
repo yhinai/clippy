@@ -23,6 +23,7 @@ struct SidebarView: View {
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject var container: AppDependencyContainer
     @State private var showClearConfirmation: Bool = false
+    @AppStorage("showSidebarShortcuts") private var showShortcuts: Bool = false
     
     var body: some View {
         VStack(spacing: 0) {
@@ -41,20 +42,18 @@ struct SidebarView: View {
             Divider()
             
             VStack(spacing: 16) {
-                // Keyboard Shortcuts Section
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("SHORTCUTS")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.secondary)
-                    
+                // Keyboard Shortcuts Section (Collapsible)
+                DisclosureGroup("Shortcuts", isExpanded: $showShortcuts) {
                     VStack(alignment: .leading, spacing: 6) {
                         KeyboardShortcutHint(keys: "⌥X", description: "Ask Clippy")
                         KeyboardShortcutHint(keys: "⌥Space", description: "Voice input")
                         KeyboardShortcutHint(keys: "⌥V", description: "Screen OCR")
                         KeyboardShortcutHint(keys: "ESC", description: "Dismiss")
                     }
+                    .padding(.top, 4)
                 }
+                .font(.caption)
+                .foregroundColor(.secondary)
                 
                 Divider()
                 

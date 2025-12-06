@@ -40,10 +40,8 @@ struct ClipboardDetailView: View {
                         .fontWeight(.bold)
                         .foregroundColor(.secondary)
                     
-                    if item.contentType == "image", let imagePath = item.imagePath, let nsImage = ClipboardService.shared.loadImage(from: imagePath) {
-                        Image(nsImage: nsImage)
-                            .resizable()
-                            .scaledToFit()
+                    if item.contentType == "image", let imagePath = item.imagePath {
+                        AsyncImageLoader(imagePath: imagePath)
                             .cornerRadius(8)
                             .frame(maxHeight: 500)
                             .shadow(radius: 2)
@@ -219,3 +217,41 @@ struct ClipboardDetailView: View {
     }
 }
 
+// MARK: - Async Image Loader
+/// Loads images on a background thread to prevent UI blocking
+struct AsyncImageLoader: View {
+    let imagePath: String
+    @State private var loadedImage: NSImage?
+    @State private var isLoading = true
+    
+    var body: some View {
+        Group {
+            if let image = loadedImage {
+                Image(nsImage: image)
+                    .resizable()
+                    .scaledToFit()
+            } else if isLoading {
+                ProgressView()
+                    .frame(height: 200)
+            } else {
+                Image(systemName: "photo")
+                    .font(.largeTitle)
+                    .foregroundColor(.secondary)
+                    .frame(height: 200)
+            }
+        }
+        .onAppear {
+            loadImageAsync()
+        }
+    }
+    
+    private func loadImageAsync() {
+        Task.detached(priority: .userInitiated) {
+            let image = ClipboardService.shared.loadImage(from: imagePath)
+            await MainActor.run {
+                self.loadedImage = image
+                self.isLoading = false
+            }
+        }
+    }
+}
