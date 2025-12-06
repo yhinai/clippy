@@ -5,197 +5,200 @@ struct ClipboardDetailView: View {
     @Bindable var item: Item
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject var container: AppDependencyContainer
-    @State private var newTagInput: String = ""
-    @State private var isEditingTags: Bool = false
+    
+    // UI State
     @State private var showCopiedFeedback: Bool = false
-    @State private var selectedTag: String? = nil
+    @State private var isHoveringBar: Bool = false
     
     var body: some View {
         ZStack {
-            // 1. Ambient Background Glow
-            GeometryReader { proxy in
-                Circle()
-                    .fill(Color.accentColor.opacity(0.15))
-                    .frame(width: 400, height: 400)
-                    .blur(radius: 100)
-                    .offset(x: -100, y: -100) // Top left glow
-                
-                Circle()
-                    .fill(Color.blue.opacity(0.1))
-                    .frame(width: 300, height: 300)
-                    .blur(radius: 80)
-                    .offset(x: proxy.size.width - 100, y: proxy.size.height - 100) // Bottom right glow
-            }
-            
+            // 1. Main Content Scroll
             ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    // Header
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text(item.title ?? "Untitled")
-                            .font(.system(.title2, design: .rounded, weight: .bold))
+                VStack(alignment: .leading, spacing: 0) {
+                    
+                    // Header Section (Title & Meta)
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text(item.title ?? item.content)
+                            .font(.system(size: 26, weight: .semibold, design: .rounded))
                             .foregroundColor(.primary)
                             .lineLimit(2)
                             .textSelection(.enabled)
+                            .padding(.top, 80) // Visual clearance for Toolbar (since ignoresSafeArea is on)
                         
-                        HStack(spacing: 6) {
+                        HStack(spacing: 8) {
                             if let appName = item.appName {
-                                Image(systemName: "app.fill")
-                                Text(appName)
+                                Label(appName, systemImage: "app.fill")
                             }
-                            Text("·")
+                            Text("•")
                             Text(item.timestamp, format: .dateTime.day().month().hour().minute())
                         }
-                        .font(.system(.caption, weight: .medium))
+                        .font(.system(size: 13, weight: .medium))
                         .foregroundColor(.secondary)
                     }
-                    .padding(.top, 20)
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, 32)
+                    .padding(.bottom, 24)
                     
-                    // Main Content
-                    if item.contentType == "image", let imagePath = item.imagePath {
-                        AsyncImageLoader(imagePath: imagePath)
-                            .cornerRadius(12)
-                            .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 5)
-                            .padding(.horizontal, 20)
-                    } else {
-                        // Read-only TextEditor with transparent background
-                        Text(item.content)
-                            .font(.system(.body, design: .monospaced))
-                            .foregroundColor(.primary.opacity(0.9))
-                            .padding(20)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(Color.clear) // Transparent to let blur show through
-                            .textSelection(.enabled)
+                    // Divider (Subtle)
+                    Rectangle()
+                        .fill(Color.primary.opacity(0.05))
+                        .frame(height: 1)
+                        .padding(.horizontal, 32)
+                        .padding(.bottom, 24)
+                    
+                    // Content Area
+                    VStack(alignment: .leading, spacing: 0) {
+                        if item.contentType == "image", let imagePath = item.imagePath {
+                            // Image Card
+                            AsyncImageLoader(imagePath: imagePath)
+                                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                        .stroke(.white.opacity(0.1), lineWidth: 1)
+                                )
+                        } else {
+                            // Text Display (Clean & Readable)
+                            Text(item.content)
+                                .font(.system(size: 14, weight: .regular, design: .monospaced))
+                                .lineSpacing(6)
+                                .foregroundColor(.primary.opacity(0.85))
+                                .kerning(0.2) // Slight letter spacing for readability
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .textSelection(.enabled)
+                        }
                     }
+                    .padding(.horizontal, 32)
                     
-                    // Tags (Flow Layout)
+                    // Tags Section
                     if !item.tags.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
+                        VStack(alignment: .leading, spacing: 12) {
                             Text("TAGS")
-                                .font(.system(size: 10, weight: .bold))
-                                .foregroundColor(.secondary)
-                                .padding(.horizontal, 20)
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundColor(.secondary.opacity(0.8))
+                                .tracking(1)
                             
                             FlowLayout(spacing: 8) {
                                 ForEach(item.tags, id: \.self) { tag in
                                     Text(tag)
-                                        .font(.system(size: 11, weight: .bold))
-                                        .foregroundColor(.white)
+                                        .font(.system(size: 12, weight: .medium, design: .rounded))
                                         .padding(.horizontal, 10)
-                                        .padding(.vertical, 4)
-                                        .background(Color.white.opacity(0.15))
+                                        .padding(.vertical, 5)
+                                        .background(Color.primary.opacity(0.05))
+                                        .foregroundColor(.secondary)
                                         .clipShape(Capsule())
-                                        .overlay(
-                                            Capsule()
-                                                .stroke(.white.opacity(0.2), lineWidth: 0.5)
-                                        )
                                 }
                             }
-                            .padding(.horizontal, 20)
                         }
+                        .padding(.top, 32)
+                        .padding(.horizontal, 32)
+                        .padding(.bottom, 100) // Clearance for floating bar
                     }
-                    
-                    Spacer(minLength: 80) // Space for floating bar
                 }
             }
-            // Floating Action Bar (Bottom Right)
-            .overlay(alignment: .bottomTrailing) {
-                HStack(spacing: 16) {
-                    Button(action: {
-                        item.isFavorite.toggle()
-                    }) {
-                        Image(systemName: item.isFavorite ? "heart.fill" : "heart")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(item.isFavorite ? .red : .primary)
+            
+            // 2. Floating Action Capsule (Bottom Right)
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                    HStack(spacing: 0) {
+                        // Favorite
+                        ActionButton(
+                            icon: item.isFavorite ? "heart.fill" : "heart",
+                            color: item.isFavorite ? .red : .primary,
+                            action: { withAnimation(.snappy) { item.isFavorite.toggle() } }
+                        )
+                        
+                        Divider().frame(height: 16).padding(.horizontal, 8)
+                        
+                        // Copy
+                        ActionButton(
+                            icon: showCopiedFeedback ? "checkmark" : "doc.on.doc",
+                            color: showCopiedFeedback ? .green : .primary,
+                            action: copyContentWithFeedback
+                        )
+                        .id("copy_btn")
+                        
+                        Divider().frame(height: 16).padding(.horizontal, 8)
+                        
+                        // Delete
+                        ActionButton(
+                            icon: "trash",
+                            color: .secondary,
+                            hoverColor: .red,
+                            action: deleteItem
+                        )
                     }
-                    .buttonStyle(.plain)
-                    
-                    Divider()
-                        .frame(height: 16)
-                    
-                    Button(action: copyContentWithFeedback) {
-                        Image(systemName: showCopiedFeedback ? "checkmark" : "doc.on.doc")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(showCopiedFeedback ? .green : .primary)
-                    }
-                    .buttonStyle(.plain)
-                    
-                    Divider()
-                        .frame(height: 16)
-                    
-                    Button(role: .destructive, action: deleteItem) {
-                        Image(systemName: "trash")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.red.opacity(0.8))
-                    }
-                    .buttonStyle(.plain)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(.regularMaterial) // Frosted glass pill
+                    .clipShape(Capsule())
+                    .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
+                    .overlay(
+                        Capsule()
+                            .stroke(.white.opacity(0.2), lineWidth: 0.5)
+                    )
+                    .scaleEffect(isHoveringBar ? 1.02 : 1.0)
+                    .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isHoveringBar)
+                    .onHover { isHoveringBar = $0 }
+                    .padding(32)
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 12)
-                .background(.ultraThinMaterial)
-                .clipShape(Capsule())
-                .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
-                .overlay(
-                    Capsule()
-                        .stroke(.white.opacity(0.2), lineWidth: 1)
-                )
-                .padding(24)
             }
         }
-        .background(.ultraThinMaterial) // Glass background for entire detail view
+        .background(Color.clear) // Ensure transparency
         .ignoresSafeArea()
     }
     
-    private func copyContent() {
+    // MARK: - Actions
+    
+    private func copyContentWithFeedback() {
         if item.contentType == "image", let imagePath = item.imagePath {
             ClipboardService.shared.copyImageToClipboard(imagePath: imagePath)
         } else {
             ClipboardService.shared.copyTextToClipboard(item.content)
         }
-    }
-    
-    private func copyContentWithFeedback() {
-        copyContent()
         
-        // Show feedback
-        withAnimation {
+        withAnimation(.spring(duration: 0.3)) {
             showCopiedFeedback = true
         }
         
-        // Reset after delay
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            withAnimation {
-                showCopiedFeedback = false
-            }
+            withAnimation { showCopiedFeedback = false }
         }
     }
     
     private func deleteItem() {
         guard let repository = container.repository else { return }
-        Task {
-            try? await repository.deleteItem(item)
-        }
-    }
-    
-    private func addTag() {
-        let trimmed = newTagInput.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
-        guard !item.tags.contains(trimmed) else {
-            newTagInput = ""
-            return
-        }
-        
-        item.tags.append(trimmed)
-        newTagInput = ""
-    }
-    
-    private func removeTag(_ tag: String) {
-        item.tags.removeAll { $0 == tag }
+        Task { try? await repository.deleteItem(item) }
     }
 }
 
-// MARK: - Async Image Loader
-/// Loads images on a background thread to prevent UI blocking
+// MARK: - Helper Components
+
+/// A minimalist icon button for the floating bar
+struct ActionButton: View {
+    let icon: String
+    var color: Color = .primary
+    var hoverColor: Color? = nil
+    let action: () -> Void
+    
+    @State private var isHovering = false
+    
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: icon)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(isHovering ? (hoverColor ?? color) : color)
+                .frame(width: 32, height: 32)
+                .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .onHover { isHovering = $0 }
+    }
+}
+
+// MARK: - Legacy Helpers
+
 struct AsyncImageLoader: View {
     let imagePath: String
     @State private var loadedImage: NSImage?
@@ -232,53 +235,6 @@ struct AsyncImageLoader: View {
         }
     }
 }
-
-// MARK: - Tag Chip View
-/// Reusable tag chip with selection and delete support
-struct TagChipView: View {
-    let tag: String
-    let isSelected: Bool
-    let isEditing: Bool
-    let onSelect: () -> Void
-    let onRemove: () -> Void
-    
-    var body: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "tag.fill")
-                .font(.system(size: 10))
-                .foregroundColor(isSelected ? .white : .blue.opacity(0.8))
-            
-            Text(tag)
-                .font(.system(.caption, weight: .medium))
-            
-            if isEditing {
-                Button(action: onRemove) {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 14))
-                        .foregroundColor(.red.opacity(0.8))
-                        .symbolEffect(.pulse, options: .repeating, isActive: isEditing)
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(isSelected ? Color.blue : Color.blue.opacity(0.12))
-        )
-        .foregroundColor(isSelected ? .white : .blue)
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .strokeBorder(isSelected ? Color.blue : Color.clear, lineWidth: 1.5)
-        )
-        .contentShape(Rectangle())
-        .onTapGesture(perform: onSelect)
-        .animation(.easeInOut(duration: 0.15), value: isSelected)
-    }
-}
-
-// MARK: - FlowLayout Helper for Tags Display
 
 struct FlowLayout: Layout {
     var spacing: CGFloat = 8
