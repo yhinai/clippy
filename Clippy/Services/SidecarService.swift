@@ -113,7 +113,21 @@ class SidecarService: AIServiceProtocol, ObservableObject {
         }
     }
     
+    func runReflector() async {
+        do {
+            let response: ReflectorResponse = try await sendRequest(endpoint: "/v1/agent/reflect", body: [:])
+            print("🪞 [SidecarService] Reflector updated persona: \(response.new_persona)")
+        } catch {
+            print("❌ [SidecarService] Reflector failed: \(error)")
+        }
+    }
+    
     // MARK: - Network Helper
+    
+    private struct ReflectorResponse: Codable {
+        let status: String
+        let new_persona: String
+    }
     
     struct ToolCall: Codable {
         let name: String

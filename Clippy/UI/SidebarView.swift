@@ -24,6 +24,7 @@ struct SidebarView: View {
     @EnvironmentObject var container: AppDependencyContainer
     @State private var showClearConfirmation: Bool = false
     @AppStorage("showSidebarShortcuts") private var showShortcuts: Bool = false
+    @EnvironmentObject private var clipboardMonitor: ClipboardMonitor // Access monitor directly
     
     var body: some View {
         VStack(spacing: 0) {
@@ -82,6 +83,21 @@ struct SidebarView: View {
                         .labelsHidden()
                 }
                 
+                // Private Mode
+                HStack {
+                    Image(systemName: "eye.slash.fill")
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+                    Text("Private Mode")
+                        .font(.system(size: 12))
+                    Spacer()
+                    Toggle("", isOn: $clipboardMonitor.isPrivateMode)
+                        .toggleStyle(.switch)
+                        .scaleEffect(0.7)
+                        .labelsHidden()
+                        .help("Stop recording clipboard history")
+                }
+                
                 Divider()
                     .opacity(0.5)
                 
@@ -109,6 +125,13 @@ struct SidebarView: View {
                     }
                     .buttonStyle(.bordered)
                     .help("Re-index Search")
+                    
+                    Button(action: runReflector) {
+                        Image(systemName: "sparkles.rectangle.stack")
+                            .font(.system(size: 11))
+                    }
+                    .buttonStyle(.bordered)
+                    .help("Run Reflector Agent (Update Persona)")
                     
                     Button(role: .destructive, action: { showClearConfirmation = true }) {
                         Image(systemName: "trash")
@@ -184,6 +207,13 @@ struct SidebarView: View {
             } catch {
                 print("❌ [SidebarView] Failed to re-index: \(error)")
             }
+        }
+    }
+    
+    private func runReflector() {
+        print("🪞 [SidebarView] Manually triggering Reflector...")
+        Task {
+            await container.sidecarService.runReflector()
         }
     }
 }

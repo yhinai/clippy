@@ -8,6 +8,7 @@ import SwiftData
 class ClipboardMonitor: ObservableObject {
     @Published var clipboardContent: String = ""
     @Published var isMonitoring: Bool = false
+    @Published var isPrivateMode: Bool = false
     
     private var timer: Timer?
     private var lastChangeCount: Int = 0
@@ -85,6 +86,8 @@ class ClipboardMonitor: ObservableObject {
     // MARK: - Clipboard Detection
     
     private func checkClipboard() {
+        if isPrivateMode { return }
+        
         let pasteboard = NSPasteboard.general
         let currentChangeCount = pasteboard.changeCount
         

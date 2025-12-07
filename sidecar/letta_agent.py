@@ -25,6 +25,9 @@ class LettaLiteAgent:
         
         self.scratchpad_block = ""
         
+        # Daily Log for Reflector
+        self.daily_log = []
+        
         # Client setup
         api_key = os.environ.get("GROK_API_KEY") or "xai-dummy-key"
         self.client = AsyncOpenAI(
@@ -180,6 +183,48 @@ class LettaLiteAgent:
             print(f"Grok Vision Error: {e}")
             return f"I tried to look, but my eyes (Grok Vision) failed. Error: {e}"
 
+    async def run_reflector(self) -> str:
+        print("Running Reflector Agent...")
+        if not self.daily_log:
+            return "No interactions to reflect on."
+            
+        # Construct Reflector Prompt
+        reflection_prompt = (
+            f"Current Persona: {self.persona_block}\n\n"
+            f"Daily Interaction Log:\n"
+            f"{json.dumps(self.daily_log[-20:], indent=2)}\n\n" # Analyze last 20 interactions
+            f"INSTRUCTIONS:\n"
+            f"You are the 'Reflector' agent. Analyze the user's interactions with Clippy today. "
+            f"Did the user seem annoyed? Amused? Productive? "
+            f"Based on this, rewrite the 'Current Persona' to better suit the user's needs. "
+            f"Return ONLY the new persona text. Keep it concise (under 50 words)."
+        )
+        
+        try:
+            messages = [{"role": "system", "content": reflection_prompt}]
+            
+            completion = await self.client.chat.completions.create(
+                model="grok-2-1212",
+                messages=messages,
+                stream=False
+            )
+            
+            new_persona = completion.choices[0].message.content
+            print(f"Reflector Result: {new_persona}")
+            
+            # Update Persona
+            self.persona_block = new_persona
+            
+            # Archive log to LanceDB (optional, but good for history)
+            # self.daily_log = [] # Keep log for now or clear it? Let's keep a rolling window or clear.
+            self.daily_log = [] 
+            
+            return new_persona
+            
+        except Exception as e:
+            print(f"Reflector Error: {e}")
+            return f"Reflection failed: {e}"
+
     async def process_message(self, message: str, context: dict) -> Dict:
         # Return type changed from str to Dict to support tool_calls in response
         
@@ -236,6 +281,9 @@ class LettaLiteAgent:
                      
                 return {"response": self._mock_response(message), "tool_calls": []}
                 
+            # Record to Daily Log
+            self.daily_log.append({"role": "user", "content": message})
+            
             completion = await self.client.chat.completions.create(
                 model="grok-2-1212",
                 messages=messages,
@@ -246,6 +294,10 @@ class LettaLiteAgent:
             
             response_message = completion.choices[0].message
             client_tool_calls = []
+            
+            # Record Assistant Response (Initial)
+            if response_message.content:
+                 self.daily_log.append({"role": "assistant", "content": response_message.content})
             
             # Handle Tool Calls
             if response_message.tool_calls:
@@ -296,8 +348,10 @@ class LettaLiteAgent:
                         model="grok-2-1212",
                         messages=messages
                     )
+                    final_content = second_response.choices[0].message.content
+                    self.daily_log.append({"role": "assistant", "content": final_content})
                     return {
-                        "response": second_response.choices[0].message.content,
+                        "response": final_content,
                         "tool_calls": []
                     }
 

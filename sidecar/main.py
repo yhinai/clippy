@@ -55,6 +55,16 @@ async def agent_vision(file: UploadFile = File(...)):
         print(f"Error processing vision: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/v1/agent/reflect")
+async def agent_reflect():
+    print("Triggering Reflector...")
+    try:
+        new_persona = await agent.run_reflector()
+        return {"status": "success", "new_persona": new_persona}
+    except Exception as e:
+        print(f"Error running reflector: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/v1/agent/message", response_model=AgentMessageResponse)
 async def agent_message(request: AgentMessageRequest):
     print(f"Received message: {request.message}")
