@@ -1,6 +1,5 @@
 fastapi
 uvicorn
-memgpt
 lancedb
 numpy
 pydantic
@@ -8,3 +7,6 @@ httpx
 python-multipart
 openai
 fastembed
+python-dotenv
+requests
+pillow

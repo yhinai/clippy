@@ -31,8 +31,54 @@ class LettaLiteAgent:
             api_key=api_key,
             base_url="https://api.x.ai/v1"
         )
-        
+
         # Define Tools
+        self.tools = [
+            {
+                "type": "function",
+                "function": {
+                    "name": "search_github",
+                    "description": "Search GitHub for repositories or code. Use this when the user asks to find a library or project.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "query": {
+                                "type": "string",
+                                "description": "The search query (e.g., 'swiftui markdown parser')",
+                            }
+                        },
+                        "required": ["query"],
+                    },
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "paste_to_app",
+                    "description": "Paste text content into the user's active application. Use this when the user explicitly asks to 'paste' something or 'put this here'.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "content": {
+                                "type": "string",
+                                "description": "The exact text content to paste.",
+                            }
+                        },
+                        "required": ["content"],
+                    },
+                }
+            }
+        ]
+    
+    def update_api_key(self, api_key: str):
+        if api_key and api_key != self.client.api_key:
+            print(f"Updating API Key (ending in ...{api_key[-4:]})")
+            self.client = AsyncOpenAI(
+                api_key=api_key,
+                base_url="https://api.x.ai/v1"
+            )
+        
+    # Define Tools
         self.tools = [
             {
                 "type": "function",
@@ -137,6 +183,10 @@ class LettaLiteAgent:
     async def process_message(self, message: str, context: dict) -> Dict:
         # Return type changed from str to Dict to support tool_calls in response
         
+        # Update API Key if provided in context
+        if "api_key" in context:
+            self.update_api_key(context["api_key"])
+        
         # 1. Update LanceDB with current clipboard content if meaningful
         # (In a real scenario, the host sends *new* clipboard items to a separate ingestion endpoint, 
         # but here we assume the 'context' might contain relevant stuff or we just search)
@@ -163,12 +213,31 @@ class LettaLiteAgent:
             # If API key is dummy, this will fail, so we mock if needed.
             if self.client.api_key == "xai-dummy-key":
                 # Basic mock tool check
-                if "github" in message.lower():
+                lower_msg = message.lower()
+                if "github" in lower_msg:
                      return {"response": "I'm in Mock Mode. I would search GitHub for that. (Set GROK_API_KEY for real tools)", "tool_calls": []}
+                
+                if "paste" in lower_msg:
+                     # Extract content to paste (naive extraction for mock)
+                     # e.g. "Paste 'Hello World' here" -> "Hello World"
+                     content = "Mock Paste Content"
+                     if "'" in message:
+                         content = message.split("'")[1]
+                     
+                     return {
+                         "response": "I'm pasting that for you (Mock Mode).",
+                         "tool_calls": [
+                             {
+                                 "name": "paste_to_app",
+                                 "parameters": {"content": content}
+                             }
+                         ]
+                     }
+                     
                 return {"response": self._mock_response(message), "tool_calls": []}
                 
             completion = await self.client.chat.completions.create(
-                model="grok-beta",
+                model="grok-2-1212",
                 messages=messages,
                 tools=self.tools,
                 tool_choice="auto",
@@ -224,7 +293,7 @@ class LettaLiteAgent:
                 if requires_second_pass:
                     # Get final response after server-side tool execution
                     second_response = await self.client.chat.completions.create(
-                        model="grok-beta",
+                        model="grok-2-1212",
                         messages=messages
                     )
                     return {

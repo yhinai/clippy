@@ -3,6 +3,10 @@ from pydantic import BaseModel
 import uvicorn
 import os
 import asyncio
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from letta_agent import agent
 from lancedb_store import store
 

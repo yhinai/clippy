@@ -27,11 +27,15 @@ class SidecarService: AIServiceProtocol, ObservableObject {
             ]
         }
         
+        // Get Grok API Key from UserDefaults
+        let grokKey = UserDefaults.standard.string(forKey: "Grok_API_Key") ?? ""
+        
         let payload: [String: Any] = [
             "message": question,
             "context": [
                 "clipboard_items": contextItems,
-                "app_name": appName ?? "Unknown"
+                "app_name": appName ?? "Unknown",
+                "api_key": grokKey
             ]
         ]
         
