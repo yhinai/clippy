@@ -4,6 +4,7 @@ import SwiftData
 enum AIServiceType: String, CaseIterable {
     case gemini = "Gemini"
     case local = "Local AI"
+    case grok = "Grok 4.1"
     case sidecar = "Clippy Sidecar (Grok/Letta)"
     
     var description: String {
@@ -12,6 +13,8 @@ enum AIServiceType: String, CaseIterable {
             return "Gemini 2.5 Flash (Cloud)"
         case .local:
             return "Local Qwen3-4b (On-device)"
+        case .grok:
+            return "Grok 4.1 (Reasoning + Fast)"
         case .sidecar:
             return "Clippy Sidecar (Python)"
         }
@@ -33,6 +36,7 @@ struct ContentView: View {
     // GeminiService is currently a @State in ContentView, but moved to container. 
     // We'll use the container one, but we need to verify if we need to observe it.
     private var geminiService: GeminiService { container.geminiService }
+    private var grokService: GrokService { container.grokService }
     private var sidecarService: SidecarService { container.sidecarService }
     private var audioRecorder: AudioRecorder { container.audioRecorder }
 
@@ -102,6 +106,13 @@ struct ContentView: View {
                         }
                     }
                 ),
+                grokKey: Binding(
+                    get: { UserDefaults.standard.string(forKey: "Grok_API_Key") ?? "" },
+                    set: {
+                        UserDefaults.standard.set($0, forKey: "Grok_API_Key")
+                        grokService.updateApiKey($0)
+                    }
+                ),
                 selectedService: $selectedAIService
             )
         }
@@ -136,6 +147,11 @@ struct ContentView: View {
         let storedKey = getStoredAPIKey()
         if !storedKey.isEmpty {
             geminiService.updateApiKey(storedKey)
+        }
+        
+        let storedGrokKey = UserDefaults.standard.string(forKey: "Grok_API_Key") ?? ""
+        if !storedGrokKey.isEmpty {
+            grokService.updateApiKey(storedGrokKey)
         }
         
         // Initialize ElevenLabs Service
@@ -452,6 +468,13 @@ struct ContentView: View {
                     appName: clipboardMonitor.currentAppName
                 )
                 imageIndex = nil
+            case .grok:
+                answer = await grokService.generateAnswer(
+                    question: capturedText,
+                    clipboardContext: clipboardContext,
+                    appName: clipboardMonitor.currentAppName
+                )
+                imageIndex = nil
             }
             
             await MainActor.run {
@@ -678,6 +701,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
     @Binding var apiKey: String
     @Binding var elevenLabsKey: String
+    @Binding var grokKey: String
     @Binding var selectedService: AIServiceType
     
     @State private var tempGeminiKey: String = ""
@@ -701,8 +725,7 @@ struct SettingsView: View {
                         SecureField("Enter Grok API key...", text: $tempGrokKey)
                             .textFieldStyle(.roundedBorder)
                             .onAppear { 
-                                // TODO: Load from sidecar config or env
-                                tempGrokKey = UserDefaults.standard.string(forKey: "Grok_API_Key") ?? "" 
+                                tempGrokKey = grokKey
                             }
                         
                         Text("Required for Clippy Sidecar (Reasoning & Vision).")
@@ -744,7 +767,7 @@ struct SettingsView: View {
                 Button("Save") {
                     apiKey = tempGeminiKey
                     elevenLabsKey = tempElevenLabsKey
-                    UserDefaults.standard.set(tempGrokKey, forKey: "Grok_API_Key")
+                    grokKey = tempGrokKey
                     dismiss()
                 }
                 .buttonStyle(.borderedProminent)

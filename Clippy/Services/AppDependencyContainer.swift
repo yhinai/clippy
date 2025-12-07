@@ -15,6 +15,7 @@ class AppDependencyContainer: ObservableObject {
     // AI Services
     let localAIService: LocalAIService
     let geminiService: GeminiService
+    let grokService: GrokService
     let sidecarService: SidecarService
     let audioRecorder: AudioRecorder
     
@@ -30,6 +31,7 @@ class AppDependencyContainer: ObservableObject {
         switch selectedAIServiceType {
         case .local: return localAIService
         case .gemini: return geminiService
+        case .grok: return grokService
         case .sidecar: return sidecarService
         }
     }
@@ -49,6 +51,7 @@ class AppDependencyContainer: ObservableObject {
         self.audioRecorder = AudioRecorder()
         self.localAIService = LocalAIService()
         self.geminiService = GeminiService(apiKey: UserDefaults.standard.string(forKey: "Gemini_API_Key") ?? "")
+        self.grokService = GrokService(apiKey: UserDefaults.standard.string(forKey: "Grok_API_Key") ?? "")
         self.sidecarService = SidecarService()
         self.textCaptureService = TextCaptureService()
         
