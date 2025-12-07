@@ -50,8 +50,16 @@ class SidecarService: AIServiceProtocol, ObservableObject {
     }
     
     func analyzeImage(imageData: Data) async -> String? {
-        // TODO: Implement /v1/agent/vision in Sidecar
-        return nil
+        isProcessing = true
+        defer { isProcessing = false }
+        
+        do {
+            let response: SidecarResponse = try await uploadImage(endpoint: "/v1/agent/vision", imageData: imageData)
+            return response.response
+        } catch {
+            print("❌ [SidecarService] Vision Error: \(error)")
+            return "Error: Vision analysis failed."
+        }
     }
     
     // MARK: - Memory Management
@@ -76,6 +84,37 @@ class SidecarService: AIServiceProtocol, ObservableObject {
     private struct SidecarResponse: Codable {
         let response: String
         let tool_calls: [String]? // Using [String] for now as placeholder
+    }
+    
+    private func uploadImage<T: Decodable>(endpoint: String, imageData: Data) async throws -> T {
+        guard let url = URL(string: "\(baseURL)\(endpoint)") else {
+            throw URLError(.badURL)
+        }
+        
+        let boundary = "Boundary-\(UUID().uuidString)"
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        
+        var body = Data()
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"screen_capture.png\"\r\n".data(using: .utf8)!)
+        body.append("Content-Type: image/png\r\n\r\n".data(using: .utf8)!)
+        body.append(imageData)
+        body.append("\r\n".data(using: .utf8)!)
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+        
+        request.httpBody = body
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            print("❌ [SidecarService] Upload error: \(String(data: data, encoding: .utf8) ?? "Unknown")")
+            throw URLError(.badServerResponse)
+        }
+        
+        return try JSONDecoder().decode(T.self, from: data)
     }
     
     private func sendRequest<T: Decodable>(endpoint: String, body: [String: Any]) async throws -> T {

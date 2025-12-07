@@ -223,8 +223,23 @@ struct ContentView: View {
                     print("✅ Vision parsing successful!")
                     print("   Extracted \(parsedContent.fullText.count) characters")
                     if !parsedContent.fullText.isEmpty {
-                        // If we have image data and Local AI is selected, generate a description
-                        if self.selectedAIService == .local, let imageData = parsedContent.imageData {
+                        // Check selected AI Service
+                        if self.selectedAIService == .sidecar, let imageData = parsedContent.imageData {
+                            self.clippyController.setState(.thinking, message: "Analyzing with Grok Vision... 👁️")
+                             Task {
+                                if let description = await self.sidecarService.analyzeImage(imageData: imageData) {
+                                     await MainActor.run {
+                                         self.saveVisionContent(description, originalText: parsedContent.fullText)
+                                         self.clippyController.setState(.done, message: "Grok Vision Complete! ✨")
+                                     }
+                                } else {
+                                     await MainActor.run {
+                                         self.saveVisionContent(parsedContent.fullText)
+                                         self.clippyController.setState(.done, message: "Saved text (Vision failed) ⚠️")
+                                     }
+                                }
+                             }
+                        } else if self.selectedAIService == .local, let imageData = parsedContent.imageData {
                             self.clippyController.setState(.thinking, message: "Analyzing image... 🧠")
                             
                             Task {
@@ -667,7 +682,8 @@ struct SettingsView: View {
     
     @State private var tempGeminiKey: String = ""
     @State private var tempElevenLabsKey: String = ""
-    
+    @State private var tempGrokKey: String = ""
+
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             Text("Settings")
@@ -678,6 +694,22 @@ struct SettingsView: View {
             
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Grok API Key")
+                            .font(.headline)
+                        
+                        SecureField("Enter Grok API key...", text: $tempGrokKey)
+                            .textFieldStyle(.roundedBorder)
+                            .onAppear { 
+                                // TODO: Load from sidecar config or env
+                                tempGrokKey = UserDefaults.standard.string(forKey: "Grok_API_Key") ?? "" 
+                            }
+                        
+                        Text("Required for Clippy Sidecar (Reasoning & Vision).")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Gemini API Key")
                             .font(.headline)
@@ -712,6 +744,7 @@ struct SettingsView: View {
                 Button("Save") {
                     apiKey = tempGeminiKey
                     elevenLabsKey = tempElevenLabsKey
+                    UserDefaults.standard.set(tempGrokKey, forKey: "Grok_API_Key")
                     dismiss()
                 }
                 .buttonStyle(.borderedProminent)

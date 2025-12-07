@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from pydantic import BaseModel
 import uvicorn
 import os
@@ -35,6 +35,20 @@ async def add_memory_item(request: MemoryItemRequest):
         return {"status": "success", "id": item_id}
     except Exception as e:
         print(f"Error adding item: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/v1/agent/vision", response_model=AgentMessageResponse)
+async def agent_vision(file: UploadFile = File(...)):
+    print(f"Received vision request: {file.filename}")
+    try:
+        content = await file.read()
+        response_text = await agent.process_vision(content)
+        return AgentMessageResponse(
+            response=response_text,
+            tool_calls=[]
+        )
+    except Exception as e:
+        print(f"Error processing vision: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/v1/agent/message", response_model=AgentMessageResponse)

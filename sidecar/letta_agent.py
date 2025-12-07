@@ -5,6 +5,8 @@ import json
 from openai import AsyncOpenAI
 from lancedb_store import store
 
+import base64
+
 class LettaLiteAgent:
     def __init__(self):
         print("Initializing Letta-Lite Agent...")
@@ -54,6 +56,45 @@ class LettaLiteAgent:
             f"You can update your memory if you learn something new about the user or yourself."
         )
         return prompt
+
+    async def process_vision(self, image_data: bytes) -> str:
+        print(f"Processing vision data: {len(image_data)} bytes")
+        
+        # In a real Grok 2 Vision implementation, we would send the image
+        # For now, if no API key, return mock.
+        if self.client.api_key == "xai-dummy-key":
+            return "I see an image! (Mock Vision Response - Set GROK_API_KEY to use Grok Vision)"
+            
+        try:
+            # Encode image
+            base64_image = base64.b64encode(image_data).decode('utf-8')
+            
+            messages = [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": "Describe this image in detail for a blind user. Focus on UI elements, text hierarchy, and visible content."},
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:image/jpeg;base64,{base64_image}",
+                            },
+                        },
+                    ],
+                }
+            ]
+            
+            completion = await self.client.chat.completions.create(
+                model="grok-2-vision-1212", # Latest Grok Vision model
+                messages=messages,
+                stream=False
+            )
+            
+            return completion.choices[0].message.content
+            
+        except Exception as e:
+            print(f"Grok Vision Error: {e}")
+            return f"I tried to look, but my eyes (Grok Vision) failed. Error: {e}"
 
     async def process_message(self, message: str, context: dict) -> str:
         # 1. Update LanceDB with current clipboard content if meaningful
