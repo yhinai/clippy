@@ -147,9 +147,9 @@ This pipeline ensures that an image is searchable not just by the text inside it
 The "Grok Jarvis" track mandates the use of the Grok API. Clippy utilizes Grok as the central reasoning engine, leveraging its specific strengths in "wit" and reasoning.
 
 ### 5.1 Model Strategy
-*   **Grok-4 (Reasoning):** Used for the primary "Ask Clippy" interface. Its "Thinking" mode allows it to plan complex actions (e.g., "Find the last 3 emails from John and summarize them"). The 128k+ context window allows Letta to load significant chunks of history when necessary.
+*   **Grok-4-1 Fast Reasoning:** Used for the primary "Ask Clippy" interface. Its "Thinking" mode allows it to plan complex actions (e.g., "Find the last 3 emails from John and summarize them"). The 2M+ context window allows Letta to load significant chunks of history when necessary.
 *   **Grok-2 Vision:** Dedicated to the screen analysis pipeline.
-*   **Grok-4-mini:** Used for background "maintenance" tasks to save cost and latency. For example, a background job runs every hour to summarize the scratchpad memory block into the human block, consolidating short-term observations into long-term facts.
+*   **Grok-4-1 Fast Non-Reasoning:** Used for background "maintenance" tasks and real-time chat to save cost and latency. For example, a background job runs every hour to summarize the scratchpad memory block into the human block, consolidating short-term observations into long-term facts.
 
 ### 5.2 Dynamic System Prompt Engineering
 To achieve the "Nostalgic 90s" persona while maintaining functionality, we employ Context Engineering. The system prompt is not static; it is dynamically assembled by Letta for each turn.

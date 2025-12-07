@@ -539,7 +539,7 @@ struct ConversationView: View {
 ## 🛠️ Technical Stack
 
 ### New Dependencies
-- **Grok API** - Primary AI service
+- **Grok API** - Primary AI service (using grok-4-1-fast-reasoning and grok-4-1-fast-non-reasoning)
 - **Mem0 API** (optional) - Long-term memory
 - **OAuth2** - Tool connector authentication
 - **GitHub API** - First tool connector
