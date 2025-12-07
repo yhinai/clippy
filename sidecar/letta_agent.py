@@ -32,6 +32,27 @@ class LettaLiteAgent:
             base_url="https://api.x.ai/v1"
         )
         
+        # Define Tools
+        self.tools = [
+            {
+                "type": "function",
+                "function": {
+                    "name": "search_github",
+                    "description": "Search GitHub for repositories or code. Use this when the user asks to find a library or project.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "query": {
+                                "type": "string",
+                                "description": "The search query (e.g., 'swiftui markdown parser')",
+                            }
+                        },
+                        "required": ["query"],
+                    },
+                }
+            }
+        ]
+
     def _construct_system_prompt(self, context: Dict) -> str:
         # Dynamic context from host
         app_name = context.get("app_name", "Unknown")
@@ -122,20 +143,64 @@ class LettaLiteAgent:
             # We use a standard model; xAI supports 'grok-beta' or similar
             # If API key is dummy, this will fail, so we mock if needed.
             if self.client.api_key == "xai-dummy-key":
+                # Basic mock tool check
+                if "github" in message.lower():
+                     return "I'm in Mock Mode. I would search GitHub for that. (Set GROK_API_KEY for real tools)"
                 return self._mock_response(message)
                 
             completion = await self.client.chat.completions.create(
                 model="grok-beta",
                 messages=messages,
+                tools=self.tools,
+                tool_choice="auto",
                 stream=False
             )
             
-            response_text = completion.choices[0].message.content
-            return response_text
+            response_message = completion.choices[0].message
+            
+            # Handle Tool Calls
+            if response_message.tool_calls:
+                print("Tool call detected!")
+                # Append assistant's message with tool calls to history
+                messages.append(response_message)
+                
+                for tool_call in response_message.tool_calls:
+                    if tool_call.function.name == "search_github":
+                        function_args = json.loads(tool_call.function.arguments)
+                        print(f"Executing search_github with args: {function_args}")
+                        
+                        tool_result = await self._execute_search_github(function_args.get("query"))
+                        
+                        messages.append({
+                            "tool_call_id": tool_call.id,
+                            "role": "tool",
+                            "name": "search_github",
+                            "content": tool_result,
+                        })
+                
+                # Get final response after tool execution
+                second_response = await self.client.chat.completions.create(
+                    model="grok-beta",
+                    messages=messages
+                )
+                return second_response.choices[0].message.content
+
+            return response_message.content
             
         except Exception as e:
             print(f"Grok API Error: {e}")
             return f"I tried to think, but my brain (Grok API) hurt. Error: {e}"
+
+    async def _execute_search_github(self, query: str) -> str:
+        # Simple mock/simulated search for now. 
+        # In a real app, this would hit the GitHub API.
+        print(f"Simulating GitHub Search for: {query}")
+        return json.dumps({
+            "results": [
+                {"name": f"{query}-lib", "url": f"https://github.com/example/{query}-lib", "stars": 1200},
+                {"name": f"awesome-{query}", "url": f"https://github.com/example/awesome-{query}", "stars": 4500},
+            ]
+        })
 
     def _mock_response(self, message: str) -> str:
         return (
