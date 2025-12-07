@@ -30,6 +30,7 @@ struct ClippyApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(container)
+                .environmentObject(container.clipboardMonitor)
                 .fontDesign(.rounded)
                 .preferredColorScheme(.dark)
                 .onAppear {
