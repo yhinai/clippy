@@ -54,6 +54,23 @@ class SidecarService: AIServiceProtocol, ObservableObject {
         return nil
     }
     
+    // MARK: - Memory Management
+    
+    func saveMemoryItem(text: String, appName: String, tags: [String] = []) async {
+        let payload: [String: Any] = [
+            "text": text,
+            "source_app": appName,
+            "tags": tags
+        ]
+        
+        do {
+            let _: [String: String] = try await sendRequest(endpoint: "/v1/memory/add", body: payload)
+            print("✅ [SidecarService] Memory item saved to LanceDB")
+        } catch {
+            print("❌ [SidecarService] Failed to save memory item: \(error)")
+        }
+    }
+    
     // MARK: - Network Helper
     
     private struct SidecarResponse: Codable {

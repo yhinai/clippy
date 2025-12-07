@@ -70,7 +70,8 @@ class AppDependencyContainer: ObservableObject {
                 repository: repo,
                 contextEngine: contextEngine,
                 geminiService: geminiService,
-                localAIService: localAIService
+                localAIService: localAIService,
+                sidecarService: sidecarService
             )
         }
         

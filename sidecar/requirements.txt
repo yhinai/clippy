@@ -1,8 +1,10 @@
 fastapi
 uvicorn
-letta
+memgpt
 lancedb
 numpy
 pydantic
 httpx
 python-multipart
+openai
+fastembed

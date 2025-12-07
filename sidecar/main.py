@@ -8,17 +8,34 @@ from lancedb_store import store
 
 app = FastAPI(title="Clippy Sidecar")
 
+from typing import Optional, List, Dict
+
 class AgentMessageRequest(BaseModel):
     message: str
-    context: dict | None = None
+    context: Optional[Dict] = None
 
 class AgentMessageResponse(BaseModel):
     response: str
-    tool_calls: list | None = None
+    tool_calls: Optional[List] = None
 
 @app.get("/health")
 async def health_check():
     return {"status": "ok", "service": "Clippy Sidecar", "letta": "initialized", "lancedb": "connected"}
+
+class MemoryItemRequest(BaseModel):
+    text: str
+    source_app: str
+    tags: List[str] = []
+
+@app.post("/v1/memory/add")
+async def add_memory_item(request: MemoryItemRequest):
+    print(f"Adding memory item: {request.text[:50]}...")
+    try:
+        item_id = store.add_item(request.text, request.source_app, request.tags)
+        return {"status": "success", "id": item_id}
+    except Exception as e:
+        print(f"Error adding item: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/v1/agent/message", response_model=AgentMessageResponse)
 async def agent_message(request: AgentMessageRequest):

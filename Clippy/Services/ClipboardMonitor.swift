@@ -15,6 +15,7 @@ class ClipboardMonitor: ObservableObject {
     private var contextEngine: ContextEngine?
     private var geminiService: GeminiService?
     private var localAIService: LocalAIService?
+    private var sidecarService: SidecarService?
     
     // MARK: - Computed Properties (delegated to ContextEngine)
     
@@ -35,12 +36,14 @@ class ClipboardMonitor: ObservableObject {
         repository: ClipboardRepository,
         contextEngine: ContextEngine,
         geminiService: GeminiService? = nil,
-        localAIService: LocalAIService? = nil
+        localAIService: LocalAIService? = nil,
+        sidecarService: SidecarService? = nil
     ) {
         self.repository = repository
         self.contextEngine = contextEngine
         self.geminiService = geminiService
         self.localAIService = localAIService
+        self.sidecarService = sidecarService
         
         // Initialize lastChangeCount to avoid processing existing content
         let pasteboard = NSPasteboard.general
@@ -226,6 +229,14 @@ class ClipboardMonitor: ObservableObject {
                     title: nil
                 )
                 print("   ✅ Item saved: \(vectorId)")
+                
+                // Sidecar Indexing (Fire & Forget)
+                if let sidecar = self.sidecarService {
+                    let text = content
+                    let app = self.currentAppName.isEmpty ? "Unknown" : self.currentAppName
+                    Task { await sidecar.saveMemoryItem(text: text, appName: app) }
+                }
+                
                 enhanceItem(newItem)
             } catch {
                 print("   ❌ Failed to save: \(error)")
