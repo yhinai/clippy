@@ -50,6 +50,23 @@ class LettaLiteAgent:
                         "required": ["query"],
                     },
                 }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "paste_to_app",
+                    "description": "Paste text content into the user's active application. Use this when the user explicitly asks to 'paste' something or 'put this here'.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "content": {
+                                "type": "string",
+                                "description": "The exact text content to paste.",
+                            }
+                        },
+                        "required": ["content"],
+                    },
+                }
             }
         ]
 
@@ -117,7 +134,9 @@ class LettaLiteAgent:
             print(f"Grok Vision Error: {e}")
             return f"I tried to look, but my eyes (Grok Vision) failed. Error: {e}"
 
-    async def process_message(self, message: str, context: dict) -> str:
+    async def process_message(self, message: str, context: dict) -> Dict:
+        # Return type changed from str to Dict to support tool_calls in response
+        
         # 1. Update LanceDB with current clipboard content if meaningful
         # (In a real scenario, the host sends *new* clipboard items to a separate ingestion endpoint, 
         # but here we assume the 'context' might contain relevant stuff or we just search)
@@ -145,8 +164,8 @@ class LettaLiteAgent:
             if self.client.api_key == "xai-dummy-key":
                 # Basic mock tool check
                 if "github" in message.lower():
-                     return "I'm in Mock Mode. I would search GitHub for that. (Set GROK_API_KEY for real tools)"
-                return self._mock_response(message)
+                     return {"response": "I'm in Mock Mode. I would search GitHub for that. (Set GROK_API_KEY for real tools)", "tool_calls": []}
+                return {"response": self._mock_response(message), "tool_calls": []}
                 
             completion = await self.client.chat.completions.create(
                 model="grok-beta",
@@ -157,6 +176,7 @@ class LettaLiteAgent:
             )
             
             response_message = completion.choices[0].message
+            client_tool_calls = []
             
             # Handle Tool Calls
             if response_message.tool_calls:
@@ -164,32 +184,65 @@ class LettaLiteAgent:
                 # Append assistant's message with tool calls to history
                 messages.append(response_message)
                 
+                # Flag to check if we need a second loop (server-side execution)
+                requires_second_pass = False
+                
                 for tool_call in response_message.tool_calls:
+                    function_args = json.loads(tool_call.function.arguments)
+                    
+                    # Server-Side Tools
                     if tool_call.function.name == "search_github":
-                        function_args = json.loads(tool_call.function.arguments)
                         print(f"Executing search_github with args: {function_args}")
-                        
                         tool_result = await self._execute_search_github(function_args.get("query"))
-                        
                         messages.append({
                             "tool_call_id": tool_call.id,
                             "role": "tool",
                             "name": "search_github",
                             "content": tool_result,
                         })
-                
-                # Get final response after tool execution
-                second_response = await self.client.chat.completions.create(
-                    model="grok-beta",
-                    messages=messages
-                )
-                return second_response.choices[0].message.content
+                        requires_second_pass = True
+                    
+                    # Client-Side Tools (to be executed by Swift Host)
+                    elif tool_call.function.name == "paste_to_app":
+                         print(f"Delegating paste_to_app to Host: {function_args}")
+                         # We don't execute here. We pass it up.
+                         # But wait, if we don't execute, we can't continue the conversation loop easily *here*.
+                         # Strategy: Return the tool call to Swift. Swift executes. Swift calls back?
+                         # Simpler: Just return the intention to Swift.
+                         client_tool_calls.append({
+                             "name": "paste_to_app",
+                             "parameters": function_args
+                         })
+                         # We mark this as "handled" for the LLM so it doesn't complain? 
+                         # No, if we want the LLM to know it happened, we'd need a callback loop.
+                         # For now, we just return the instruction to Swift and end the turn.
+                         return {
+                             "response": "I'm pasting that for you.",
+                             "tool_calls": client_tool_calls
+                         }
 
-            return response_message.content
+                if requires_second_pass:
+                    # Get final response after server-side tool execution
+                    second_response = await self.client.chat.completions.create(
+                        model="grok-beta",
+                        messages=messages
+                    )
+                    return {
+                        "response": second_response.choices[0].message.content,
+                        "tool_calls": []
+                    }
+
+            return {
+                "response": response_message.content,
+                "tool_calls": []
+            }
             
         except Exception as e:
             print(f"Grok API Error: {e}")
-            return f"I tried to think, but my brain (Grok API) hurt. Error: {e}"
+            return {
+                "response": f"I tried to think, but my brain (Grok API) hurt. Error: {e}",
+                "tool_calls": []
+            }
 
     async def _execute_search_github(self, query: str) -> str:
         # Simple mock/simulated search for now. 

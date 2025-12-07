@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 
 @MainActor
@@ -36,11 +37,40 @@ class SidecarService: AIServiceProtocol, ObservableObject {
         
         do {
             let response: SidecarResponse = try await sendRequest(endpoint: "/v1/agent/message", body: payload)
+            
+            // Handle Client-Side Tools
+            if let tools = response.tool_calls {
+                for tool in tools {
+                    if tool.name == "paste_to_app", let content = tool.parameters["content"] {
+                         print("📋 [SidecarService] Executing paste_to_app: \(content.count) chars")
+                         await MainActor.run {
+                             self.pasteText(content)
+                         }
+                    }
+                }
+            }
+            
             return response.response
         } catch {
             print("❌ [SidecarService] Error: \(error)")
             return "Error: Could not connect to Clippy Sidecar (Python). Is it running?"
         }
+    }
+    
+    private func pasteText(_ text: String) {
+        // Copy to clipboard
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(text, forType: .string)
+        
+        // Simulate Cmd+V
+        let source = CGEventSource(stateID: .hidSystemState)
+        let vKeyDown = CGEvent(keyboardEventSource: source, virtualKey: 0x09, keyDown: true)
+        let vKeyUp = CGEvent(keyboardEventSource: source, virtualKey: 0x09, keyDown: false)
+        vKeyDown?.flags = .maskCommand
+        vKeyUp?.flags = .maskCommand
+        vKeyDown?.post(tap: .cghidEventTap)
+        vKeyUp?.post(tap: .cghidEventTap)
     }
     
     func generateTags(content: String, appName: String?, context: String?) async -> [String] {
@@ -81,9 +111,14 @@ class SidecarService: AIServiceProtocol, ObservableObject {
     
     // MARK: - Network Helper
     
+    struct ToolCall: Codable {
+        let name: String
+        let parameters: [String: String] // Simplified
+    }
+
     private struct SidecarResponse: Codable {
         let response: String
-        let tool_calls: [String]? // Using [String] for now as placeholder
+        let tool_calls: [ToolCall]? 
     }
     
     private func uploadImage<T: Decodable>(endpoint: String, imageData: Data) async throws -> T {

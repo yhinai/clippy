@@ -56,11 +56,11 @@ async def agent_message(request: AgentMessageRequest):
     print(f"Received message: {request.message}")
     
     # Delegate to Letta Agent
-    response_text = await agent.process_message(request.message, request.context or {})
+    result = await agent.process_message(request.message, request.context or {})
     
     return AgentMessageResponse(
-        response=response_text,
-        tool_calls=[]
+        response=result.get("response", ""),
+        tool_calls=result.get("tool_calls", [])
     )
 
 if __name__ == "__main__":
