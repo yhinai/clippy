@@ -15,6 +15,7 @@ class AppDependencyContainer: ObservableObject {
     // AI Services
     let localAIService: LocalAIService
     let geminiService: GeminiService
+    let sidecarService: SidecarService
     let audioRecorder: AudioRecorder
     
     /// Currently selected AI service (persisted in UserDefaults)
@@ -29,6 +30,7 @@ class AppDependencyContainer: ObservableObject {
         switch selectedAIServiceType {
         case .local: return localAIService
         case .gemini: return geminiService
+        case .sidecar: return sidecarService
         }
     }
     
@@ -47,6 +49,7 @@ class AppDependencyContainer: ObservableObject {
         self.audioRecorder = AudioRecorder()
         self.localAIService = LocalAIService()
         self.geminiService = GeminiService(apiKey: UserDefaults.standard.string(forKey: "Gemini_API_Key") ?? "")
+        self.sidecarService = SidecarService()
         self.textCaptureService = TextCaptureService()
         
         // 2. Initialize Dependent Services

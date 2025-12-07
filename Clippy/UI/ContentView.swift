@@ -4,6 +4,7 @@ import SwiftData
 enum AIServiceType: String, CaseIterable {
     case gemini = "Gemini"
     case local = "Local AI"
+    case sidecar = "Clippy Sidecar (Grok/Letta)"
     
     var description: String {
         switch self {
@@ -11,6 +12,8 @@ enum AIServiceType: String, CaseIterable {
             return "Gemini 2.5 Flash (Cloud)"
         case .local:
             return "Local Qwen3-4b (On-device)"
+        case .sidecar:
+            return "Clippy Sidecar (Python)"
         }
     }
 }
@@ -30,6 +33,7 @@ struct ContentView: View {
     // GeminiService is currently a @State in ContentView, but moved to container. 
     // We'll use the container one, but we need to verify if we need to observe it.
     private var geminiService: GeminiService { container.geminiService }
+    private var sidecarService: SidecarService { container.sidecarService }
     private var audioRecorder: AudioRecorder { container.audioRecorder }
 
     // Constants/State
@@ -425,6 +429,13 @@ struct ContentView: View {
                     print("❌ Streaming Error: \(error)")
                     answer = nil // Fallback to handling nil below
                 }
+                imageIndex = nil
+            case .sidecar:
+                answer = await sidecarService.generateAnswer(
+                    question: capturedText,
+                    clipboardContext: clipboardContext,
+                    appName: clipboardMonitor.currentAppName
+                )
                 imageIndex = nil
             }
             

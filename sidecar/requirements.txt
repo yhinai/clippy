@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+letta
+lancedb
+numpy
+pydantic
+httpx
+python-multipart
